@@ -2,19 +2,19 @@
 
 Fine-tuning and robustness evaluation of **Qwen3-VL-8B-Instruct** for multimodal misogyny classification on the **MAMI (Multimedia Automatic Misogyny Identification)** dataset.
 
-This project was developed for **Deep Learning (EE-559) at EPFL** and investigates whether a vision-language model can remain robust when visual content is deliberately obfuscated by perturbations not observed during evaluation.
+This project was developed for **Deep Learning (EE-559) at EPFL** by **Matteo Barberis, Giovanni Pomati, and Giorgio Panizzutti**.
 
 ## Overview
 
-Multimodal content moderation models can exploit both textual and visual signals, but their predictions may be sensitive to relatively simple modifications of the image.
+Multimodal content moderation systems can rely on both textual and visual cues, but their predictions may be sensitive to relatively simple modifications of the image.
 
-In this project, we fine-tuned **Qwen3-VL-8B-Instruct** using **LoRA** and built an evaluation pipeline for studying robustness to synthetic visual obfuscations.
+This project studies whether a large vision-language model can be adapted efficiently to multimodal misogyny classification while remaining robust to synthetic visual obfuscations.
 
-The project focuses on three questions:
+We fine-tuned **Qwen3-VL-8B-Instruct** using **Low-Rank Adaptation (LoRA)** and built an evaluation pipeline focused on three questions:
 
-1. Can a large vision-language model be efficiently adapted to multimodal misogyny classification?
-2. How much does its performance deteriorate under visual obfuscation?
-3. Can training with controlled perturbations improve generalization to **previously unseen perturbation geometries**?
+1. Can a large vision-language model be adapted efficiently to multimodal misogyny classification?
+2. How much does performance deteriorate when the visual modality is partially obfuscated?
+3. Can robustness-oriented fine-tuning generalize to **perturbation geometries not observed during training**?
 
 ## Model and Training
 
@@ -22,7 +22,7 @@ The base model is:
 
 **Qwen3-VL-8B-Instruct**
 
-Fine-tuning was performed using parameter-efficient **Low-Rank Adaptation (LoRA)** rather than updating all model parameters.
+Rather than fine-tuning the full model, we used **LoRA** for parameter-efficient adaptation.
 
 Main tools:
 
@@ -31,63 +31,60 @@ Main tools:
 - Hugging Face Transformers
 - Hugging Face PEFT / LoRA
 - scikit-learn
-- NumPy / pandas
+- NumPy
+- pandas
 
 The model was adapted to the MAMI image-text classification task while retaining the pretrained multimodal representations of Qwen3-VL.
 
 ## Dataset
 
-The experiments use the **MAMI — Multimedia Automatic Misogyny Identification** dataset.
+Experiments were conducted on the **MAMI — Multimedia Automatic Misogyny Identification** dataset.
 
-Each example contains:
+Each sample contains:
 
 - an image;
 - associated text;
 - a misogyny label.
 
-This makes the task particularly useful for studying multimodal robustness because predictions can rely on information contained in either modality or on their interaction.
+The task is well suited to multimodal robustness analysis because predictions may depend on either individual modality or on their interaction.
 
-## Robustness Experiment
+## Robustness Evaluation
 
-The central part of the project is a controlled robustness experiment based on **synthetic visual obfuscation**.
+The core experiment studies robustness to **synthetic visual obfuscations**.
 
-Images are modified using sticker-like perturbations designed to partially obscure visual information while preserving the underlying semantic content.
+Images are modified using sticker-like perturbations that partially obscure visual information while preserving the underlying semantic content.
 
-Rather than evaluating only on perturbations resembling those used during training, the robustness evaluation includes **previously unseen sticker geometries**.
+The evaluation deliberately includes **previously unseen sticker geometries**, allowing us to test whether robustness learned during fine-tuning transfers beyond the exact augmentation patterns used during training.
 
-This tests whether the model learns robustness that transfers beyond the exact augmentation pattern used during training.
+Two evaluation settings are considered:
 
-### Evaluation Settings
-
-We evaluate robustness in two settings:
-
-- **Image-only:** measuring sensitivity to changes in visual information.
-- **Image + text:** evaluating whether multimodal information helps compensate for visual corruption.
+- **Image only:** measures sensitivity to corruption of the visual modality.
+- **Image + text:** evaluates whether textual information can compensate for degraded visual information.
 
 Performance is measured using **macro-F1**, with particular attention to the degradation between clean and perturbed inputs.
 
 ## Results
 
-The robustness-oriented fine-tuning procedure substantially reduced the degradation in macro-F1 caused by previously unseen visual obfuscations.
+Robustness-oriented fine-tuning substantially reduced the macro-F1 degradation caused by previously unseen visual perturbations.
 
 | Evaluation setting | Macro-F1 degradation before | Macro-F1 degradation after |
-|---|---:|---:|
-| Image only | 5.9% | **1.5%** |
-| Image + text | 7.0% | **1.1%** |
+| ------------------ | --------------------------: | -------------------------: |
+| Image only         |                        5.9% |                   **1.5%** |
+| Image + text       |                        7.0% |                   **1.1%** |
 
-The corresponding prediction files and experiment summaries are retained under `Hate_Project/results/`, allowing the clean, obfuscated and fine-tuned conditions to be inspected separately.
+The strongest improvement was observed in the multimodal image-text setting, where the degradation decreased from **7.0% to 1.1%**.
 
-The experiments indicate that robustness improvements transfer beyond the precise perturbation geometry used during training, particularly in the multimodal image-text setting.
+Prediction files and experiment summaries are stored under `Hate_Project/results/`, allowing the clean, obfuscated, and fine-tuned conditions to be inspected separately.
+
+Overall, the experiments indicate that robustness improvements can transfer beyond the precise perturbation geometry used during training.
 
 ## Experimental Pipeline
-
-The project can be summarized as:
 
 ```text
 MAMI image + text samples
           |
           v
-  Data preprocessing
+   Data preprocessing
           |
           v
  Qwen3-VL-8B-Instruct
@@ -108,4 +105,14 @@ MAMI image + text samples
                                  |
                                  v
                          Macro-F1 analysis
-                         
+```
+
+## Collaboration
+
+This was a **three-person project developed collaboratively by Matteo Barberis, Giovanni Pomati, and Giorgio Panizzutti**.
+
+Model development, experimentation, evaluation, and analysis were carried out jointly throughout the project rather than being divided into strictly separate individual components.
+
+---
+
+**EPFL EE-559 — Deep Learning**
