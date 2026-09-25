@@ -1,6 +1,6 @@
-# MemeLens-VLM: Robust Multimodal Misogyny Classification with Qwen3-VL
+# Robustness Evaluation of Vision-Language Models in Social Media Contexts
 
-Fine-tuning and robustness evaluation of **Qwen3-VL-8B-Instruct** for multimodal misogyny classification on the **MAMI (Multimedia Automatic Misogyny Identification)** dataset.
+Fine-tuning and robustness evaluation of **QCRI/MemeLens-VLM** for multimodal misogyny classification on the **MAMI (Multimedia Automatic Misogyny Identification)** dataset.
 
 This project was developed for **Deep Learning (EE-559) at EPFL** by **Matteo Barberis, Giovanni Pomati, and Giorgio Panizzutti**.
 
@@ -10,7 +10,7 @@ Multimodal content moderation systems can rely on both textual and visual cues, 
 
 This project studies whether a large vision-language model can be adapted efficiently to multimodal misogyny classification while remaining robust to synthetic visual obfuscations.
 
-We fine-tuned **Qwen3-VL-8B-Instruct** using **Low-Rank Adaptation (LoRA)** and built an evaluation pipeline focused on three questions:
+We fine-tuned **QCRI/MemeLens-VLM** using **Low-Rank Adaptation (LoRA)** and built an evaluation pipeline focused on three questions:
 
 1. Can a large vision-language model be adapted efficiently to multimodal misogyny classification?
 2. How much does performance deteriorate when the visual modality is partially obfuscated?
@@ -20,7 +20,7 @@ We fine-tuned **Qwen3-VL-8B-Instruct** using **Low-Rank Adaptation (LoRA)** and 
 
 The base model is:
 
-**Qwen3-VL-8B-Instruct**
+**QCRI/MemeLens-VLM**
 
 Rather than fine-tuning the full model, we used **LoRA** for parameter-efficient adaptation.
 
