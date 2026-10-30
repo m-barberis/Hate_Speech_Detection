@@ -1,0 +1,24 @@
+Hate_Project/results/emoji_overlay_eval/full_20variants_1gpu/predictions/
+# Local datasets and generated results
+data/raw/**
+data/interim/**
+data/processed/**
+outputs/**
+!data/**/
+!outputs/**/
+!data/**/.gitkeep
+!outputs/**/.gitkeep
+!outputs/reports/
+!outputs/reports/**
+!outputs/figures/
+!outputs/figures/**
+
+# Python environments and generated files
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+.env
+.DS_Store

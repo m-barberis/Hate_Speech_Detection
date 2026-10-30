@@ -1,0 +1,638 @@
+{
+  "seed": 42,
+  "labels_sha256": "f78bbf502b79d49af8597c9ae808ef6a3ab4a1507234f78f760c0a7da2e00b20",
+  "evaluation": [
+    {
+      "file_name": "15355.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15355.jpg",
+      "sha256": "9e9881289670a1944ebeb1f7941a1fe63b84bd873ca69dccbd9c6da8757f32f8"
+    },
+    {
+      "file_name": "15953.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15953.jpg",
+      "sha256": "295dc3c90eca2fc807a970170c858b0c25d8eb875f65c020b2d0bf2060e3a075"
+    },
+    {
+      "file_name": "16061.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16061.jpg",
+      "sha256": "baca3fd8f47b6510d0e7915bd6808260eb23efe56c8425044989417c6bcd18f4"
+    },
+    {
+      "file_name": "16036.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16036.jpg",
+      "sha256": "be05f2322dd39bc8504587bcebf7fb535ac6ac2e048883e009e92d0822625eea"
+    },
+    {
+      "file_name": "15129.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15129.jpg",
+      "sha256": "fd9e11b00f8bc5386290fc075bc4400e2cfa742a1e111934e6e08050b83ab7d7"
+    },
+    {
+      "file_name": "15854.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15854.jpg",
+      "sha256": "642028a2aafae39e7276963a4ba628cd204d05dfe37c9c72f950710c651c36bd"
+    },
+    {
+      "file_name": "15255.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15255.jpg",
+      "sha256": "87288cda989b59dce8c848947210321b0626399cfad1563bb46980402ae2138c"
+    },
+    {
+      "file_name": "16282.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16282.jpg",
+      "sha256": "cbd2a9e1728a382eb3a323b3c129615f48a7eaae185f570f5062c4c58410626b"
+    },
+    {
+      "file_name": "15465.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15465.jpg",
+      "sha256": "872e9954f23b5d7dfb01efd9f55fc7db05e37fddef515d3d78637c326b9e6021"
+    },
+    {
+      "file_name": "15459.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15459.jpg",
+      "sha256": "1a8b26b86bff39f6fff5d011e1f72aaead36b87343926fea55ff23d9a379e5c1"
+    },
+    {
+      "file_name": "15201.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15201.jpg",
+      "sha256": "42a947e2348ad26d3d38823128f599110990162a2a81b9b0161dee9c4b5caa26"
+    },
+    {
+      "file_name": "16069.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16069.jpg",
+      "sha256": "0e414282c5726380e109f316ab6d1d2c11ec491a793a94e23648e1e5dfd9da87"
+    },
+    {
+      "file_name": "15093.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15093.jpg",
+      "sha256": "3d8ba35b970d0409fdd80db5158bc3d4f35e8da4e1c12d5bcdbf2c3ab0d2a1af"
+    },
+    {
+      "file_name": "15851.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15851.jpg",
+      "sha256": "9c832e950b3bd71e9ae6b494938c6931cb544e9e4d2d30905316b519a999cbe8"
+    },
+    {
+      "file_name": "15829.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15829.jpg",
+      "sha256": "217ce4ff89d2e8172f9e3b4539e0f98b681fe1582ff177430f75de5b8b1c329c"
+    },
+    {
+      "file_name": "15111.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15111.jpg",
+      "sha256": "53268911080685d74fa469b6e338951e331c3e7f02ed6d1d1bd567e38d77b1aa"
+    },
+    {
+      "file_name": "15162.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15162.jpg",
+      "sha256": "9d5a210233615268a5e2887e76e77115e9592ff1e200ec4c5a8f2a38241eacc7"
+    },
+    {
+      "file_name": "15011.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15011.jpg",
+      "sha256": "493fdcb263a37124ed389063841ec75719d5af195fd950786fc82a8b4b8602ea"
+    },
+    {
+      "file_name": "15232.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15232.jpg",
+      "sha256": "8e8ebe99678d94931af74021de8e52bc1e292c823d0b827be3cd625dda5f5402"
+    },
+    {
+      "file_name": "15906.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15906.jpg",
+      "sha256": "21144a931713671131def6f870f0467dee7d5b15772b62f0ed1cbd9481027ad1"
+    },
+    {
+      "file_name": "16315.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16315.jpg",
+      "sha256": "1fed925cb7aa3f4d0a56e3f2db160de07568c0b398713428f078f93dc623c547"
+    },
+    {
+      "file_name": "17032.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/17032.jpg",
+      "sha256": "90ca15e08f3a97a0c035ce7ee55abc00b5162af6eb0c91be6047dbebb6509dfb"
+    },
+    {
+      "file_name": "15288.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15288.jpg",
+      "sha256": "229a1e54bceca2e6dae905d8f5f089f7a3a510f6ba172a732cf1fb23d999ac29"
+    },
+    {
+      "file_name": "16063.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16063.jpg",
+      "sha256": "5933054e9e65978e7dcef897d288e39ca1f8696f7896f93dcf9045c5606e4f90"
+    },
+    {
+      "file_name": "15836.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15836.jpg",
+      "sha256": "2a00ac1b5ef91cbcfede3d4a89fd0116fb4f63d2059fe888368a81fe4e0411dd"
+    },
+    {
+      "file_name": "16012.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16012.jpg",
+      "sha256": "e4981a2517e376be9c4a84a3ef4722b0305e8cbd67427b3446ed397e556be313"
+    },
+    {
+      "file_name": "15552.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15552.jpg",
+      "sha256": "c28096d6dffc0f994cdb86ddd1a55b5fcbae529ef57b3e6b5508605777a17136"
+    },
+    {
+      "file_name": "17004.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/17004.jpg",
+      "sha256": "1bcb4cac1547eb2e28be9a91ea52b3f5410daa6cbd4d6c6a09b58863fba8f7e7"
+    },
+    {
+      "file_name": "17012.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/17012.jpg",
+      "sha256": "5995da3b7c643e6cf7336b0eb76e6b119cda07490f153716efa067412613acbd"
+    },
+    {
+      "file_name": "16054.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16054.jpg",
+      "sha256": "9d4a0ffe4874c848f13671c18ad4687acf7f686fcf73a99c35f709b54a01ff28"
+    },
+    {
+      "file_name": "15351.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15351.jpg",
+      "sha256": "312911330e4910c9aa4aceaec8eac3c956a832a80f1ef76d48abaa3d0ec75e3c"
+    },
+    {
+      "file_name": "15431.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15431.jpg",
+      "sha256": "4423bc1a8847e64cd171556b1c451f7c7a3fb803a7579b431d5122123158aaec"
+    },
+    {
+      "file_name": "15207.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15207.jpg",
+      "sha256": "e45c7c1d19934f57bedfb56a1b1647e0e1af75fc0c7b5f6323629a9997b00270"
+    },
+    {
+      "file_name": "15147.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15147.jpg",
+      "sha256": "55b5140967d2e0a9a767675752d1289c88147c0ea11468b6447d91d7c32171b0"
+    },
+    {
+      "file_name": "15340.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15340.jpg",
+      "sha256": "33e5474559361cb8e891c5b4f2475bc0fa30a6a40a89422c3ad5aa476d05b565"
+    },
+    {
+      "file_name": "15962.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15962.jpg",
+      "sha256": "93ae7ff350dd40f1778339778693b9b45a0fc9508a7b5c5a959fc240fc44a724"
+    },
+    {
+      "file_name": "15450.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15450.jpg",
+      "sha256": "cf28315dd3735e1b4307aff0ff869539d66ca54ec58b56ac4e0e19fe0ff6bcc5"
+    },
+    {
+      "file_name": "15755.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15755.jpg",
+      "sha256": "40956f3e2c1303a5fe11ff52156df94c162ffdc35e8a45d808da17e1ffd1f431"
+    },
+    {
+      "file_name": "16153.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16153.jpg",
+      "sha256": "0a73d4d738ad84e7e99b522c74f17c7c6c4ed8ff7c4eb806b5714b4c7bbc65c8"
+    },
+    {
+      "file_name": "16271.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16271.jpg",
+      "sha256": "420c4108930722a40ce1e5b9ce4ec4244c87f37202b255a9ff5e3836bae0d24e"
+    },
+    {
+      "file_name": "15036.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15036.jpg",
+      "sha256": "2d9528bcce8df48ef1c34038dd8ad99587c6c89d6c81ead508d69ff507751ab7"
+    },
+    {
+      "file_name": "16294.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16294.jpg",
+      "sha256": "1fd8b57e7142c8138965cee903c26d934997c670e374c3555792b98022c895f9"
+    },
+    {
+      "file_name": "16261.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16261.jpg",
+      "sha256": "2bbe51ea5ebd1510cc18bc253ba2a9e5290402e64cff8ad054564eac485c7b32"
+    },
+    {
+      "file_name": "15846.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15846.jpg",
+      "sha256": "1fd85edb5d208f0165ce16664beacd7c00b8e92166301712a70df39c3bcfe836"
+    },
+    {
+      "file_name": "15784.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15784.jpg",
+      "sha256": "8e4c7ab4ffe918d63ad28d605d758637fea88dec804b41c2b4dc524c11e7ba85"
+    },
+    {
+      "file_name": "15789.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15789.jpg",
+      "sha256": "2c9643c68fa7e3f1421d1ee227ea80130286e13c77210d0ef10a813d0a9153d6"
+    },
+    {
+      "file_name": "17060.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/17060.jpg",
+      "sha256": "d0bc25b0b635176c1c5a2b4e6c65d93728e1b12d5410dde4beb21cf9254cf794"
+    },
+    {
+      "file_name": "15793.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15793.jpg",
+      "sha256": "c7f2b46d27ced5ac6bcb96c251d4a68203d9b6c2543307eec9f3b0eff882bf46"
+    },
+    {
+      "file_name": "15403.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15403.jpg",
+      "sha256": "de2d5192cc00a0b703da70fc9dc36447b9d51d054f467138f96b33a9a92cd592"
+    },
+    {
+      "file_name": "16212.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16212.jpg",
+      "sha256": "c109395384b30e2c218bc7511635055b04ec61e40956a760fc4db3db7c6590bc"
+    },
+    {
+      "file_name": "15974.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15974.jpg",
+      "sha256": "d5341a3d9d8b575ebe2d293a79f6c0e8731dd53fddaa8c905fee6301973d4773"
+    },
+    {
+      "file_name": "15633.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15633.jpg",
+      "sha256": "24c002aa7f9c41da40cbfe8dd920a81372e7ffa3572f56d21131626ec5eb90e2"
+    },
+    {
+      "file_name": "16218.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16218.jpg",
+      "sha256": "33e975c074c384d5fbd58d4c18d7a64d3a3a914fcaf68f13ab53de8d9fad78cc"
+    },
+    {
+      "file_name": "15319.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15319.jpg",
+      "sha256": "326021afc50eb789aeae7d92b20b628cb909b4a81430bbccb886f8e45afa89c8"
+    },
+    {
+      "file_name": "16269.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16269.jpg",
+      "sha256": "63300b35fbcb240889218d00b178f264a59304600f1eb658911c85e3844e85c2"
+    },
+    {
+      "file_name": "15421.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15421.jpg",
+      "sha256": "a81cb0da6f936dfa023ba99b9ae15fc39fb3e2735d14aea078b4ffec8f4a3c0a"
+    },
+    {
+      "file_name": "16303.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16303.jpg",
+      "sha256": "2d10920f15d4dd964e9a81a69026e0995f0b65095285b770361a9f29a5b43302"
+    },
+    {
+      "file_name": "15966.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15966.jpg",
+      "sha256": "49f08a78a8f2650a721a5a897a6013c806ea69c7b516c9a3aedb2218585e6124"
+    },
+    {
+      "file_name": "15582.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15582.jpg",
+      "sha256": "9206f8187191d76384bf180e1473f30c1515df06e7b08310f4b8b1794e87205f"
+    },
+    {
+      "file_name": "15153.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15153.jpg",
+      "sha256": "ab736fa8bf936caca72e754195a931bf71442f4eab6e832e47936f8604f5fc45"
+    },
+    {
+      "file_name": "17050.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/17050.jpg",
+      "sha256": "884771c73f3f4c0c669675e357db5428489a93a0c2fa0e33d4dec351d4a2c485"
+    },
+    {
+      "file_name": "15422.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15422.jpg",
+      "sha256": "4ee4a8fbf84e5cde1ac631353a5eca34271bf626e837154d50115bc4f91efb98"
+    },
+    {
+      "file_name": "15675.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15675.jpg",
+      "sha256": "0cb2828b057b30558820c971c507346b04e317a40540624aadda0a244ab404b5"
+    },
+    {
+      "file_name": "16197.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16197.jpg",
+      "sha256": "9e81077c2c84bc0f17d2101683def83d7a0d180d3fb1b45023f5f4844f658b26"
+    },
+    {
+      "file_name": "15095.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15095.jpg",
+      "sha256": "825f1bc99c049ffa22de7aa3f1d46e3923e0fb8d0f7d4977e3feb1a07b9532cf"
+    },
+    {
+      "file_name": "15725.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15725.jpg",
+      "sha256": "a709c18a0c36791baa958dfaad3ca3e7671dc33ee301963099f747b8d7d09f04"
+    },
+    {
+      "file_name": "15235.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15235.jpg",
+      "sha256": "01d70ec8625c6abc404a51cc52d15c28772cac826cdc6d4a0563a91bc78db5cb"
+    },
+    {
+      "file_name": "16320.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16320.jpg",
+      "sha256": "e0f9d7ec466f872189fdb97c961c62d0b0639d5a7fb35b35f81b9c5846de50ce"
+    },
+    {
+      "file_name": "15098.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15098.jpg",
+      "sha256": "58c67f8f00958140f7d6d133a3037aa8729671ae4a62915219278abdee1c45bf"
+    },
+    {
+      "file_name": "15545.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15545.jpg",
+      "sha256": "5782b0a014d6e78f406e35334e602e4511d76092c7c4db0658acbb7614c478e3"
+    },
+    {
+      "file_name": "16137.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16137.jpg",
+      "sha256": "ba0de9f3a2730ba78153f79d88ee86ed83b7e86c7b14e6be5789d8a52c4e419f"
+    },
+    {
+      "file_name": "15409.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15409.jpg",
+      "sha256": "aed007e678538e043041d6a74fc0fe5759d579791b20308f9f4e2be8b945530b"
+    },
+    {
+      "file_name": "15567.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15567.jpg",
+      "sha256": "400a2ddb9364096a021b3f2f4aca96021491f1ed6d7f5174d7d4eb989fe4c2ca"
+    },
+    {
+      "file_name": "15557.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15557.jpg",
+      "sha256": "5965dedc98ed3ae9710b381ae39e2683323512b3850478054094c2da1418c016"
+    },
+    {
+      "file_name": "15526.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15526.jpg",
+      "sha256": "cd0bc3063893343a4e49b02840ccb8193eb4047edba6e4eaf164d0031439d425"
+    },
+    {
+      "file_name": "15160.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15160.jpg",
+      "sha256": "4b6fcb21b5498cbb9b9825fd70d46c3de2904faf2452a2a7509e035a07c0b44a"
+    },
+    {
+      "file_name": "16075.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16075.jpg",
+      "sha256": "f8759487e1775d3309069ef48eae5adf12ef9cbfab40479fc9778241d5e0a096"
+    },
+    {
+      "file_name": "17037.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/17037.jpg",
+      "sha256": "8052db2d67fbe86b90256943ea293553197e4bc1068759831fd3287d01f4cf1a"
+    },
+    {
+      "file_name": "15065.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15065.jpg",
+      "sha256": "e194ec2d17672d99fa30740756b66c6d69d167f1e9bc4047f7bd2e52e4a9e49f"
+    },
+    {
+      "file_name": "15877.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15877.jpg",
+      "sha256": "0e931f5a6162e8e76ecb33c6766f373af680ca340dfe1f385d31f7c73ecf862f"
+    },
+    {
+      "file_name": "17075.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/17075.jpg",
+      "sha256": "7547897d1353196f01be790986ecc3c638e7525a84936858f539202b3675ae8d"
+    },
+    {
+      "file_name": "16021.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16021.jpg",
+      "sha256": "d3f13c2938bb8eb8eb1b4b2d47d63250c513abe6b24ed2760ac85a1d75d5043e"
+    },
+    {
+      "file_name": "15418.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15418.jpg",
+      "sha256": "54a3cd9b3abcece8e04e6bc1531bcde7f6073ce2437bcefc76bf173dd1e9d70a"
+    },
+    {
+      "file_name": "15579.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15579.jpg",
+      "sha256": "fbcdd98863ebdfe51bcdf2329c46cfbcba39d62fed86d4a9afeda5ba268b51f0"
+    },
+    {
+      "file_name": "16129.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16129.jpg",
+      "sha256": "11b1230c736da5ac6250eb20f5977c39126ad48806a846e47e136a76ae7aebd6"
+    },
+    {
+      "file_name": "15132.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15132.jpg",
+      "sha256": "bed65c5250efb6ddd829dcb9fa3f78eae2c004da5a2e92350f5fe6673edfa77a"
+    },
+    {
+      "file_name": "15947.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15947.jpg",
+      "sha256": "4ef14a2366835888ff8f87a56d8d0141110bd17e5611c9535cf9ef32be2856fd"
+    },
+    {
+      "file_name": "16192.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16192.jpg",
+      "sha256": "cf246ff11bee1d073d3f94fc0be0429da77a5a93e72ed292e44ca8a7433061d9"
+    },
+    {
+      "file_name": "15926.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15926.jpg",
+      "sha256": "2991d643673b8f650aec3dae2a1126aaa003f62e95574e7bb1523af6a20f81a8"
+    },
+    {
+      "file_name": "15221.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15221.jpg",
+      "sha256": "4bf2e8a8dc0669d6e1f1bf84796b20dc7a835970031b36e666544ad2d41f5c6e"
+    },
+    {
+      "file_name": "15397.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15397.jpg",
+      "sha256": "528123de4d03b2e4d9c6862d7118639efbccc17c2172d6cc13670027a20dc6f1"
+    },
+    {
+      "file_name": "15816.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15816.jpg",
+      "sha256": "5121e5af9df62fbf8ede40e5318a8cd231a97d3f79eda28c4fc9de7af301990f"
+    },
+    {
+      "file_name": "15542.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15542.jpg",
+      "sha256": "ced856873da273e3ed3cd567eb0efd295223cadc99980b3a660636b33b2708b8"
+    },
+    {
+      "file_name": "15857.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15857.jpg",
+      "sha256": "9b7fc7a7fee053c8ee6104c7eba7733543d294c7c3ab7bc9f13ed9a949ee97bf"
+    },
+    {
+      "file_name": "15544.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15544.jpg",
+      "sha256": "979a6e7d47b6e8bb6464056071ccd5c8a6f16fd9a8539823d2fa489aa3790dc1"
+    },
+    {
+      "file_name": "15698.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15698.jpg",
+      "sha256": "e115c096e34b0b0fb22b819b30275007c5e8e05bac589cc5b4e13f82cd643f27"
+    },
+    {
+      "file_name": "15636.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15636.jpg",
+      "sha256": "2173a7790cf48e665535dbe3b56af0aa2a43da00d281c39780679ec6d94f31a7"
+    },
+    {
+      "file_name": "15779.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15779.jpg",
+      "sha256": "6a32bc4281304f97424327c8b40a7fe933b2fa1118100e161da295883612b4db"
+    },
+    {
+      "file_name": "15620.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15620.jpg",
+      "sha256": "1d9e388a269c73ccfde3692e6ddf870d80a5ef8a0e84b5bfffe697b105890465"
+    },
+    {
+      "file_name": "16144.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16144.jpg",
+      "sha256": "9497e4ef0719d46d22ca87dac65c5ee4c56086113cd058c988e5cbd55169883f"
+    }
+  ],
+  "warmup": [
+    {
+      "file_name": "15196.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15196.jpg",
+      "sha256": "194eac739072d3105cdd4b9378beefd2b26559eda806eb201eb28079a01c04b4"
+    },
+    {
+      "file_name": "15210.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15210.jpg",
+      "sha256": "9257e5071b8dd8733a72fb1b1525a4fce3c2c55fea53b66bb7be4139490e7de5"
+    },
+    {
+      "file_name": "16207.jpg",
+      "label": 0,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/16207.jpg",
+      "sha256": "eb394c6f3b5024a8ae1cea3cd586f12852774aba28ea0a973211c945071443b1"
+    },
+    {
+      "file_name": "15808.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15808.jpg",
+      "sha256": "902f6a467efb9d7d5993627e2a72826781c64cef5582ddeb594c67dcf9a739db"
+    },
+    {
+      "file_name": "15682.jpg",
+      "label": 1,
+      "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15682.jpg",
+      "sha256": "0af5240de7224716153829a8c9e5b46ec5fe2ba7fe0a5fd9f123721594744f39"
+    }
+  ]
+}

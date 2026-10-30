@@ -1,0 +1,4 @@
+{
+  "smoke": true,
+  "warmup_examples": 5
+}
