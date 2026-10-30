@@ -39,10 +39,22 @@ def save_json(path, obj):
         json.dump(obj, stream, indent=2, allow_nan=False)
 
 
+SETTINGS["answer_parser"] = "leading-label-v1"
+
+
 def parse_answer(text):
     answer = text.strip().lower()
-    # Exact labels only: never interpret "not misogynous" as misogynous.
-    return {'clean': 0, 'misogynous': 1}.get(answer, -1)
+    match = re.match(r"^(clean|misogynous)(?=$|[\s.,:;!?])", answer)
+    if not match:
+        return -1
+    labels = set(re.findall(r"\b(?:clean|misogynous)\b", answer.splitlines()[0]))
+    if len(labels) != 1:
+        return -1
+    return {"clean": 0, "misogynous": 1}[match.group(1)]
+
+
+def strict_answer(text):
+    return text.strip().lower() in ("clean", "misogynous")
 
 
 def quality(truth, predicted):
@@ -167,7 +179,17 @@ def run(args):
             bnb_4bit_compute_dtype=torch.float16, bnb_4bit_use_double_quant=False)
     torch.cuda.reset_peak_memory_stats()
     load_start = time.perf_counter()
-    model = Qwen3VLForConditionalGeneration.from_pretrained(MODEL, **kwargs).eval()
+    # Legacy dispatch compatibility fix, identical for FP16 and NF4.
+    from functools import partial
+    from unittest.mock import patch
+    from transformers import modeling_utils
+    SETTINGS["dispatch_force_hooks"] = True
+    with patch.object(
+        modeling_utils,
+        "dispatch_model",
+        partial(modeling_utils.dispatch_model, force_hooks=True),
+    ):
+        model = Qwen3VLForConditionalGeneration.from_pretrained(MODEL, **kwargs).eval()
     torch.cuda.synchronize()
     load_seconds = time.perf_counter() - load_start
     load_peak = torch.cuda.max_memory_allocated()
@@ -244,6 +266,7 @@ def run(args):
         raw = processor.decode(answer_ids, skip_special_tokens=True)
         return dict(file_name=row['file_name'], true_label=row['label'],
                     pred_label=parse_answer(raw), raw_answer=raw,
+                    strict_format=strict_answer(raw),
                     input_signature=signature, input_tokens=token_count,
                     image_grid_thw=grid, generated_tokens=len(answer_ids),
                     latency_ms=elapsed, peak_allocated_bytes=peak,
@@ -333,6 +356,7 @@ def summarize(args):
     result['paired_stratified_bootstrap_delta_95_interval'] = [percentile(deltas, .025), percentile(deltas, .975)]
     for mode, meta, records in [('fp16', a, ar), ('nf4', b, br)]:
         result[mode].update(dict(
+            strict_format_compliance=sum(strict_answer(r['raw_answer']) for r in records if r['pass_id'] == 0) / len(ids),
             median_latency_ms=statistics.median(r['latency_ms'] for r in records),
             p95_latency_ms=percentile([r['latency_ms'] for r in records], .95),
             pass_median_latency_ms=[statistics.median(r['latency_ms'] for r in records if r['pass_id'] == p)
