@@ -1,9 +1,11 @@
 Hate_Project/results/emoji_overlay_eval/full_20variants_1gpu/predictions/
 # Local datasets and generated results
 data/raw/**
+data/assets/**
 data/interim/**
 data/processed/**
 outputs/**
+results/interview_preparation/**
 !data/**/
 !outputs/**/
 !data/**/.gitkeep
