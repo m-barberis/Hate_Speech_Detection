@@ -1,0 +1,4 @@
+# Add only PEFT to the working memelens-nf4 stack with --no-deps.
+# PyTorch 2.5.1, Transformers 4.57.1, Accelerate 1.10.1 and
+# bitsandbytes 0.42.0 remain unchanged. No datasets package is needed.
+peft==0.17.1
