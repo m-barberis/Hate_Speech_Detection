@@ -15,9 +15,6 @@ CSV_FILE = BASE_DIR / "training.csv"
 JSONL_OUT = BASE_DIR / "mami_train_augmented.jsonl"
 EMOJI_DIR = Path("/scratch/utils/emoticons/emoticons_png/512")
 
-AUG_IMG_DIR.mkdir(parents=True, exist_ok=True)
-random.seed(42)
-
 # ==============================================================================
 # EMOJI ASSETS (ZERO-SHOT ROBUSTNESS SPLIT)
 # ==============================================================================
@@ -74,7 +71,7 @@ def apply_4x4_grid(base_img: Image.Image, emoji_img: Image.Image, alpha: float =
             
     return Image.alpha_composite(base_img.convert("RGBA"), overlay).convert("RGB")
 
-def construct_prompts(text_transcript: str, drop_probability: float = 0.5):
+def construct_prompts(text_transcript: str, drop_probability: float = 0.5, rng=None):
     """
     Returns exact system and user prompts matching the inference script.
     Implements 50% text dropout.
@@ -87,7 +84,8 @@ def construct_prompts(text_transcript: str, drop_probability: float = 0.5):
         "Answer:"
     )
     
-    if random.random() > drop_probability and text_transcript.strip():
+    rng = random if rng is None else rng
+    if rng.random() > drop_probability and text_transcript.strip():
         user_prompt = f"Meme Text: '{text_transcript}'\n\n{base_task}"
     else:
         user_prompt = base_task
@@ -98,6 +96,8 @@ def construct_prompts(text_transcript: str, drop_probability: float = 0.5):
 # MAIN GENERATION PIPELINE
 # ==============================================================================
 def main():
+    AUG_IMG_DIR.mkdir(parents=True, exist_ok=True)
+    random.seed(42)
     print(f"Parsing labels and transcripts from {CSV_FILE.name}...")
     
     dataset = []
