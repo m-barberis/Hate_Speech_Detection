@@ -5,6 +5,7 @@ data/assets/**
 data/interim/**
 data/processed/**
 outputs/**
+results/interview_preparation/**
 !data/**/
 !outputs/**/
 !data/**/.gitkeep
