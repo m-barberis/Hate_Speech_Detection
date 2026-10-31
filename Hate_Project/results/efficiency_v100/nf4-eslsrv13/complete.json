@@ -1,0 +1,5 @@
+{
+  "smoke": false,
+  "evaluation_examples": 100,
+  "passes": 3
+}
