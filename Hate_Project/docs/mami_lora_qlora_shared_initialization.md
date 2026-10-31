@@ -86,3 +86,36 @@ CUDA_VISIBLE_DEVICES=0 python scripts/mami_lora_qlora/training_smoke.py \
 Both runs must print the same verified initial adapter hash and retain matching
 input signatures. Updated hashes may differ after the optimizer step. These checks
 do not launch full training, change splits, regenerate overlays or extend validation.
+
+## V2 server results supplied by the operator
+
+Both modes completed four microbatches and one optimizer step on eslsrv13.
+Both verified the same initial canonical adapter hash:
+
+`23031894c7d1f7e624ffa6791a3fab47b8f96dc38ab2910442460cd8850d6e79`
+
+Both recorded the same shared initialization file hash:
+
+`093172c931d1237e90fcbe249480d45015089e0b32e7f6995092a0568a866aa8`
+
+Both reported gradients for 508 parameter tensors and no trainable parameters
+without gradients. Updated adapter hashes differ, as expected when training uses
+different frozen base representations. This does not require equal gradients or
+equal losses between modes.
+
+FP16 losses were 0.2252, 0.0780, 0.0256 and 0.0357. NF4 losses were 0.3249,
+0.0622, 0.0522 and 0.0300. These rounded losses match the v1 smoke losses.
+That is consistent with default zero-update initialization before the single
+optimizer step; nonzero initialized matrices can still change gradients.
+
+FP16 peak allocated memory was 19,237,097,984 bytes, with 21,307,064,320 bytes
+reserved. NF4 peak allocated memory was 9,374,896,640 bytes, with 10,101,981,184
+bytes reserved. These are diagnostic smoke allocations, not full-training peaks.
+Reported gradient norms (24.1313 FP16, 40.5659 NF4) are values before clipping
+to 1.0, not quality metrics or evidence of a failure.
+
+The output verifies matched initial tensor values and basic forward/backward/
+optimizer compatibility. Four selected records do not establish convergence,
+full-run memory feasibility, or a training speed comparison. Detailed v2 input
+signatures are saved on the server and have not been independently inspected
+locally. Full training and expanded validation remain unlaunched.

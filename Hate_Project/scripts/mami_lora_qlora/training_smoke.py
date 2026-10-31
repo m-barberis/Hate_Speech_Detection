@@ -155,12 +155,8 @@ def adapter_hash(parameters):
         for name, value in parameters)
 
 
-def run(args):
-    root, out = Path(args.data).resolve(), Path(args.output).resolve()
-    if out.exists():
-        raise FileExistsError(f'Use a new smoke output directory: {out}')
-    records, complete = load_training_records(root)
-    selected = select_smoke_records(records)
+def initialize_model(args, root, out, complete, selected, purpose='smoke'):
+    """Shared loading, adapter initialization and masking controls for both runners."""
     lora_config, lr = original_recipe()
     shared_arrays, shared_meta = shared_init.load(args.adapter_init)
     if shared_meta['controls']['checkpoint'] != dict(model=MODEL, revision=REVISION):
@@ -198,7 +194,8 @@ def run(args):
         processor.image_processor.max_pixels = 524288
         processor.image_processor.min_pixels = 4096
     out.mkdir(parents=True)
-    save_json(out / 'request.json', dict(mode=args.mode, checkpoint=dict(model=MODEL, revision=REVISION),
+    save_json(out / 'request.json', dict(mode=args.mode, purpose=purpose,
+        checkpoint=dict(model=MODEL, revision=REVISION),
         versions=versions, prepared_complete_sha256=digest(root / 'complete.json'),
         prepared_manifest_sha256=complete['manifest_sha256'], legacy_trainer_sha256=digest(LEGACY_TRAINER),
         runner_sha256=digest(__file__), lora=lora_config, learning_rate=lr,
@@ -264,6 +261,17 @@ def run(args):
         adapter_hash_schema=shared_init.HASH_SCHEMA,
         gpu_uuid=str(getattr(torch.cuda.get_device_properties(0), 'uuid', 'unavailable')),
         load_peak_allocated_bytes=load_peak, processor=processor.image_processor.to_dict()))
+    return model, processor, trainable, lr
+
+
+def run(args):
+    root, out = Path(args.data).resolve(), Path(args.output).resolve()
+    if out.exists():
+        raise FileExistsError(f'Use a new smoke output directory: {out}')
+    records, complete = load_training_records(root)
+    selected = select_smoke_records(records)
+    model, processor, trainable, lr = initialize_model(args, root, out, complete, selected)
+    import torch
     optimizer = torch.optim.AdamW([p for _, p in trainable], lr=lr, weight_decay=0.0, foreach=False)
     scaler = torch.amp.GradScaler('cuda', init_scale=1024.0)
     optimizer.zero_grad(set_to_none=True)

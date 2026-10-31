@@ -6,6 +6,11 @@ Both new arms use the same prepared records and evaluate the final epoch-two
 checkpoint. Validation monitors training; it does not select a checkpoint.
 Historical LoRA scores provide context rather than a controlled baseline.
 
+Full training with global batch 48 and all four fixed validation conditions was
+subsequently approved. See `docs/mami_lora_qlora_full_training.md` for the current
+runner, validation supplement, commands and measurement scope. The original
+preparation described below stays unchanged.
+
 ## Data preparation
 
 Inputs on eslsrv13:
@@ -86,10 +91,11 @@ training script assumes multi-GPU DDP and must be adapted before use on the
 single V100. The old training implementation is not a launch command for this
 follow-up. Check finite loss/gradients and memory before full training.
 
-Future evaluations use five maximum new tokens, greedy decoding and the same
+Evaluations use five maximum new tokens, greedy decoding and the same
 leading-label parser in all arms, retaining strict format compliance separately.
-The existing ten-token efficiency runs remain a separate result. No GPU jobs
-or five-token baseline reruns have been launched by this implementation step.
+The existing ten-token efficiency runs remain a separate result. Both v2 adapter
+smoke gates passed on the server with matched initial values. Full training and
+five-token public-baseline reruns have not yet been launched in this chat.
 
 No model-training code or existing efficiency runner settings are changed by
 this preparation step. Full-run hardware, quality and latency results cannot
