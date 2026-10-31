@@ -13,6 +13,7 @@ import numpy as np
 import shared_adapter_init as shared
 import training_smoke as common
 import train_comparison as training
+from training_batches import combine_batches, full_record_losses
 
 
 VARIANTS = ('baseline', 'cached', 'answer-only', 'batch2')
@@ -39,38 +40,12 @@ def selected_positions(labels):
     return positions.tolist()
 
 
-def combine_batches(entries, pad_token_id):
-    """Right-pad already verified single-image records without reprocessing images."""
-    import torch
-    from transformers.feature_extraction_utils import BatchFeature
-    allowed = {'input_ids', 'attention_mask', 'labels', 'pixel_values', 'image_grid_thw'}
-    if any(set(batch) != allowed for batch, _ in entries):
-        raise ValueError('Unexpected processor fields; review batching before proceeding')
-    max_len = max(batch['input_ids'].shape[1] for batch, _ in entries)
-    result = {}
-    for key, fill in (('input_ids', pad_token_id), ('attention_mask', 0), ('labels', -100)):
-        padded = []
-        for batch, _ in entries:
-            tensor = batch[key]
-            padded.append(torch.nn.functional.pad(tensor, (0, max_len-tensor.shape[1]), value=fill))
-        result[key] = torch.cat(padded, dim=0)
-    for key in ('pixel_values', 'image_grid_thw'):
-        result[key] = torch.cat([batch[key] for batch, _ in entries], dim=0)
-    return BatchFeature(result)
-
-
 def forward_loss(model, batch, answer_only, positions=None):
     import torch
     if not answer_only:
         if batch['labels'].shape[0] == 1:
             return model(**batch).loss
-        # Preserve the original mean of per-record losses when answer lengths differ.
-        inputs = {key: value for key, value in batch.items() if key != 'labels'}
-        logits = model(**inputs).logits[:, :-1].float()
-        targets = batch['labels'][:, 1:]
-        losses = torch.nn.functional.cross_entropy(logits.reshape(-1, logits.shape[-1]),
-            targets.reshape(-1), ignore_index=-100, reduction='none').view_as(targets)
-        return (losses.sum(dim=1) / (targets != -100).sum(dim=1)).mean()
+        return full_record_losses(model, batch).mean()
     indices = torch.tensor(positions, dtype=torch.long, device=batch['input_ids'].device)
     inputs = {key: value for key, value in batch.items() if key != 'labels'}
     logits = model(**inputs, logits_to_keep=indices).logits

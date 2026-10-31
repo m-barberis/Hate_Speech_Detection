@@ -5,14 +5,18 @@ import json
 from pathlib import Path
 import random
 import time
+from contextlib import closing
 
 import prepare_validation_conditions as validation_data
 import shared_adapter_init as shared
 import training_smoke as common
+import training_batches as batching
 
 
 EPOCHS = 2
-ACCUMULATION = 48
+MICROBATCH = 2
+ACCUMULATION = 24
+EFFECTIVE_BATCH = MICROBATCH * ACCUMULATION
 SEED = 42
 
 
@@ -22,7 +26,7 @@ def epoch_order(count, epoch):
     return order
 
 
-def update_groups(order, accumulation=ACCUMULATION):
+def update_groups(order, accumulation=EFFECTIVE_BATCH):
     if not order or len(order) % accumulation:
         raise ValueError('Training epoch must contain complete accumulation groups')
     return [order[i:i + accumulation] for i in range(0, len(order), accumulation)]
@@ -100,7 +104,7 @@ def preflight(args):
     if updates != [375, 375]:
         raise ValueError('Expected 375 optimizer updates per epoch')
     report = dict(mode=args.mode, original_training_images=9000, training_records=len(records),
-        epochs=EPOCHS, microbatch=1, gradient_accumulation=ACCUMULATION,
+        epochs=EPOCHS, microbatch=MICROBATCH, gradient_accumulation=ACCUMULATION,
         effective_global_batch=48, updates_per_epoch=updates, optimizer_updates=sum(updates),
         validation_counts={name: len(rows) for name, rows in conditions.items()},
         training_order_sha256=[order_hash(records, order) for order in orders],
@@ -109,6 +113,8 @@ def preflight(args):
         prepared_complete_sha256=common.digest(root / 'complete.json'),
         validation_complete_sha256=common.digest(Path(args.validation) / 'complete.json'),
         final_checkpoint_policy='epoch_2_without_validation_selection',
+        training_logits='full_sequence', cpu_prefetch_microbatches=2,
+        preprocessing_policy='one CPU producer; at most two pending pairs plus consumer; no dataset cache',
         validation_max_new_tokens=5, lr_schedule='linear_decay_without_warmup')
     return records, conditions, prepared, validated, report
 
@@ -209,6 +215,7 @@ def run(args):
         adam_betas=[0.9, 0.999], adam_epsilon=1e-8, max_gradient_norm=1.0,
         training_loss_weighting='equal weight per record across each 48-record accumulation group',
         runner_sha256=common.digest(__file__), shared_runner_sha256=common.digest(common.__file__),
+        batching_source_sha256=common.digest(batching.__file__),
         validation_preparer_sha256=common.digest(validation_data.__file__),
         scoring_source_sha256=common.digest(metrics_source),
         smoke_completion_sha256={mode: common.digest(Path(folder) / 'complete.json')
@@ -222,6 +229,16 @@ def run(args):
     random.seed(SEED)
     torch.manual_seed(SEED)
     torch.cuda.manual_seed_all(SEED)
+    pad_id = processor.tokenizer.pad_token_id
+    if pad_id is None:
+        raise ValueError('Explicit tokenizer padding token required for batching')
+
+    def prepare_pair(indices):
+        entries = [common.make_batch(processor, records[index]) for index in indices]
+        batch = batching.combine_batches(entries, pad_id)
+        cpu_bytes = sum(t.numel()*t.element_size() for t in batch.values())
+        return batch, [audit for _, audit in entries], cpu_bytes
+
     peaks, reserved_peaks, epoch_summaries = [], [], []
     step = 0
     with (out / 'microbatches.jsonl').open('x') as micro_log, (out / 'training_steps.jsonl').open('x') as step_log:
@@ -230,57 +247,68 @@ def run(args):
             model.config.use_cache = False
             start_epoch = time.perf_counter()
             epoch_losses = []
-            for group in update_groups(epoch_order(len(records), epoch)):
-                torch.cuda.synchronize()
-                torch.cuda.reset_peak_memory_stats()
-                start_update = time.perf_counter()
-                losses = []
-                for index in group:
-                    batch, audit = common.make_batch(processor, records[index])
-                    batch = batch.to('cuda')
-                    with torch.autocast('cuda', dtype=torch.float16):
-                        output = model(**batch)
-                        loss = output.loss
-                    if not torch.isfinite(loss).item():
-                        raise RuntimeError('Non-finite training loss; stop for review')
-                    scaler.scale(loss / ACCUMULATION).backward()
-                    value = float(loss.detach().item())
-                    losses.append(value)
-                    audit.update(epoch=epoch, optimizer_step=step+1, training_record_index=index, loss=value)
-                    micro_log.write(json.dumps(audit) + '\n')
-                    del batch, output, loss
-                gradients = [p.grad for _, p in trainable if p.grad is not None]
-                if len(gradients) != len(trainable):
-                    raise RuntimeError('Some adapter parameter tensors received no gradient')
-                if any(p.grad is not None for p in model.parameters() if not p.requires_grad):
-                    raise RuntimeError('Frozen base received gradients')
-                scaler.unscale_(optimizer)
-                norm = torch.nn.utils.clip_grad_norm_([p for _, p in trainable], 1.0, error_if_nonfinite=True)
-                used_lr = optimizer.param_groups[0]['lr']
-                scaler.step(optimizer)
-                scaler.update()
-                scheduler.step()
-                if not torch.stack([torch.isfinite(p).all() for _, p in trainable]).all().item():
-                    raise RuntimeError('Non-finite adapter parameters after update')
-                optimizer.zero_grad(set_to_none=True)
-                torch.cuda.synchronize()
-                step += 1
-                peaks.append(torch.cuda.max_memory_allocated())
-                reserved_peaks.append(torch.cuda.max_memory_reserved())
-                mean_loss = sum(losses) / len(losses)
-                epoch_losses.extend(losses)
-                item = dict(epoch=epoch, optimizer_step=step, records_in_update=len(group),
-                    mean_record_loss=mean_loss, gradient_norm_before_clipping=float(norm.item()),
-                    learning_rate=used_lr, next_learning_rate=optimizer.param_groups[0]['lr'],
-                    wall_seconds=time.perf_counter()-start_update,
-                    peak_allocated_bytes=peaks[-1], peak_reserved_bytes=reserved_peaks[-1])
-                step_log.write(json.dumps(item) + '\n')
-                step_log.flush()
-                micro_log.flush()
-                if step == 1 or step % 10 == 0:
-                    print(f"Epoch {epoch}/2, update {step}/750: loss={mean_loss:.4f}, lr={used_lr:.3g}, "
-                          f"allocated={peaks[-1]/2**30:.2f} GiB", flush=True)
-                del gradients
+            epoch_ordering = epoch_order(len(records), epoch)
+            with closing(batching.prefetched(batching.paired_indices(epoch_ordering), prepare_pair)) as inputs:
+                for group in update_groups(epoch_ordering):
+                    torch.cuda.synchronize()
+                    torch.cuda.reset_peak_memory_stats()
+                    start_update = time.perf_counter()
+                    losses = []
+                    max_cpu_pair_bytes = 0
+                    for offset in range(0, len(group), MICROBATCH):
+                        indices = group[offset:offset+MICROBATCH]
+                        batch, audits, cpu_bytes = next(inputs)
+                        max_cpu_pair_bytes = max(max_cpu_pair_bytes, cpu_bytes)
+                        if [(a['original_id'], a['is_augmented']) for a in audits] != [
+                                (records[i]['original_id'], records[i]['is_augmented']) for i in indices]:
+                            raise RuntimeError('Prefetch changed training order')
+                        batch = batch.to('cuda')
+                        with torch.autocast('cuda', dtype=torch.float16):
+                            record_losses = batching.full_record_losses(model, batch)
+                            loss = record_losses.mean()
+                        if not torch.isfinite(loss).item():
+                            raise RuntimeError('Non-finite training loss; stop for review')
+                        scaler.scale(loss / ACCUMULATION).backward()
+                        values = record_losses.detach().float().cpu().tolist()
+                        losses.extend(values)
+                        for index, audit, value in zip(indices, audits, values):
+                            audit.update(epoch=epoch, optimizer_step=step+1, training_record_index=index,
+                                microbatch_in_update=offset//MICROBATCH+1, loss=value)
+                            micro_log.write(json.dumps(audit) + '\n')
+                        del batch, record_losses, loss
+                    gradients = [p.grad for _, p in trainable if p.grad is not None]
+                    if len(gradients) != len(trainable):
+                        raise RuntimeError('Some adapter parameter tensors received no gradient')
+                    if any(p.grad is not None for p in model.parameters() if not p.requires_grad):
+                        raise RuntimeError('Frozen base received gradients')
+                    scaler.unscale_(optimizer)
+                    norm = torch.nn.utils.clip_grad_norm_([p for _, p in trainable], 1.0, error_if_nonfinite=True)
+                    used_lr = optimizer.param_groups[0]['lr']
+                    scaler.step(optimizer)
+                    scaler.update()
+                    scheduler.step()
+                    if not torch.stack([torch.isfinite(p).all() for _, p in trainable]).all().item():
+                        raise RuntimeError('Non-finite adapter parameters after update')
+                    optimizer.zero_grad(set_to_none=True)
+                    torch.cuda.synchronize()
+                    step += 1
+                    peaks.append(torch.cuda.max_memory_allocated())
+                    reserved_peaks.append(torch.cuda.max_memory_reserved())
+                    mean_loss = sum(losses) / len(losses)
+                    epoch_losses.extend(losses)
+                    item = dict(epoch=epoch, optimizer_step=step, records_in_update=len(group),
+                        microbatches_in_update=ACCUMULATION, max_preprocessed_pair_tensor_bytes=max_cpu_pair_bytes,
+                        mean_record_loss=mean_loss, gradient_norm_before_clipping=float(norm.item()),
+                        learning_rate=used_lr, next_learning_rate=optimizer.param_groups[0]['lr'],
+                        wall_seconds=time.perf_counter()-start_update,
+                        peak_allocated_bytes=peaks[-1], peak_reserved_bytes=reserved_peaks[-1])
+                    step_log.write(json.dumps(item) + '\n')
+                    step_log.flush()
+                    micro_log.flush()
+                    if step == 1 or step % 10 == 0:
+                        print(f"Epoch {epoch}/2, update {step}/750: loss={mean_loss:.4f}, lr={used_lr:.3g}, "
+                              f"step={item['wall_seconds']:.1f}s, allocated={peaks[-1]/2**30:.2f} GiB", flush=True)
+                    del gradients
             training_seconds = time.perf_counter() - start_epoch
             epoch_out = out / f'epoch-{epoch}'
             print(f'Saving epoch {epoch} adapter and training state', flush=True)
