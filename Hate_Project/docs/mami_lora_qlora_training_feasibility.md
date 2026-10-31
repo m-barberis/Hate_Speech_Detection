@@ -3,7 +3,9 @@
 The prepared-data hashes and server imports have passed operator checks:
 18,000 training records, 1,000 clean validation records, 1,000 overlay validation
 records. Server versions are PyTorch 2.5.1, Transformers 4.57.1, Accelerate 1.10.1,
-bitsandbytes 0.42.0, and PEFT 0.17.1. Actual model training remains unverified.
+bitsandbytes 0.42.0, and PEFT 0.17.1. Both v1 training smoke checks have since
+passed, but their initial adapter hashes differ. Full training remains unverified.
+Follow `docs/mami_lora_qlora_shared_initialization.md` for the revised v2 gate.
 
 ## Scope
 
@@ -54,13 +56,15 @@ After syncing the new code, run from the server project root in memelens-nf4:
 ```bash
 CUDA_VISIBLE_DEVICES=0 python scripts/mami_lora_qlora/training_smoke.py \
   --mode fp16 \
+  --adapter-init results/mami_lora_qlora/shared_init_seed42 \
   --data data/processed/mami_lora_qlora_seed42 \
-  --output results/mami_lora_qlora/smoke-fp16-v1
+  --output results/mami_lora_qlora/smoke-fp16-v2
 
 CUDA_VISIBLE_DEVICES=0 python scripts/mami_lora_qlora/training_smoke.py \
   --mode nf4 \
+  --adapter-init results/mami_lora_qlora/shared_init_seed42 \
   --data data/processed/mami_lora_qlora_seed42 \
-  --output results/mami_lora_qlora/smoke-nf4-v1
+  --output results/mami_lora_qlora/smoke-nf4-v2
 ```
 
 Stop at the first failure and inspect the error. Do not start the second command

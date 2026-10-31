@@ -15,6 +15,8 @@ import random
 import time
 from unittest.mock import patch
 
+import shared_adapter_init as shared_init
+
 
 MODEL = 'QCRI/MemeLens-VLM'
 REVISION = 'a633183849df60a37251d29c3f1b0d379ae801f5'
@@ -148,11 +150,9 @@ def make_batch(processor, row):
 
 
 def adapter_hash(parameters):
-    h = hashlib.sha256()
-    for name, value in parameters:
-        h.update(name.encode())
-        h.update(value.detach().float().cpu().contiguous().numpy().tobytes())
-    return h.hexdigest()
+    return shared_init.canonical_hash(
+        (name, value.detach().float().cpu().contiguous().numpy())
+        for name, value in parameters)
 
 
 def run(args):
@@ -162,6 +162,17 @@ def run(args):
     records, complete = load_training_records(root)
     selected = select_smoke_records(records)
     lora_config, lr = original_recipe()
+    shared_arrays, shared_meta = shared_init.load(args.adapter_init)
+    if shared_meta['controls']['checkpoint'] != dict(model=MODEL, revision=REVISION):
+        raise ValueError('Shared initialization checkpoint differs')
+    if shared_meta['controls']['lora'] != lora_config:
+        raise ValueError('Shared initialization LoRA configuration differs')
+    if shared_meta['controls']['legacy_trainer_sha256'] != digest(LEGACY_TRAINER):
+        raise ValueError('Original training recipe source changed since the reference smoke')
+    if shared_meta['controls']['learning_rate'] != lr:
+        raise ValueError('Shared initialization reference learning rate differs')
+    if shared_meta['controls']['prepared_complete_sha256'] != digest(root / 'complete.json'):
+        raise ValueError('Shared initialization belongs to different prepared data')
     import torch
     from transformers import AutoProcessor, BitsAndBytesConfig, Qwen3VLForConditionalGeneration, modeling_utils
     from peft import LoraConfig, get_peft_model
@@ -171,6 +182,8 @@ def run(args):
         raise RuntimeError('This gate requires the approved V100 and sm_70 support')
     versions = {p: importlib.metadata.version(p) for p in
                 ('torch', 'transformers', 'accelerate', 'bitsandbytes', 'peft', 'numpy', 'Pillow')}
+    if versions != shared_meta['controls']['versions']:
+        raise RuntimeError('Software versions differ from the shared initialization reference')
     for key, expected in dict(torch='2.5.1', transformers='4.57.1', accelerate='1.10.1',
                               bitsandbytes='0.42.0', peft='0.17.1').items():
         if versions[key].split('+')[0] != expected:
@@ -189,6 +202,9 @@ def run(args):
         versions=versions, prepared_complete_sha256=digest(root / 'complete.json'),
         prepared_manifest_sha256=complete['manifest_sha256'], legacy_trainer_sha256=digest(LEGACY_TRAINER),
         runner_sha256=digest(__file__), lora=lora_config, learning_rate=lr,
+        shared_init_metadata_sha256=digest(Path(args.adapter_init) / 'metadata.json'),
+        shared_init_weights_sha256=shared_meta['weights_sha256'],
+        adapter_hash_schema=shared_init.HASH_SCHEMA,
         smoke_microbatches=len(selected), gradient_checkpointing='nonreentrant',
         max_pixels=524288, min_pixels=4096, dispatch_force_hooks=True,
         base_policy='frozen loaded dtype; FP32 adapters; FP16 autocast',
@@ -227,17 +243,25 @@ def run(args):
         raise RuntimeError('Only LoRA parameters may be trainable')
     for _, parameter in trainable:
         parameter.data = parameter.data.to(torch.float32)
+    shared_init.validate_arrays(shared_arrays, {n: tuple(p.shape) for n, p in trainable})
+    with torch.no_grad():
+        for name, parameter in trainable:
+            parameter.copy_(torch.from_numpy(shared_arrays[name]).to(device=parameter.device))
     if any(p.dtype == torch.bfloat16 for p in list(model.parameters()) + list(model.buffers())):
         raise RuntimeError('Unexpected BF16 state on V100')
     model.config.use_cache = False
     model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={'use_reentrant': False})
     model.train()
     initial_hash = adapter_hash(trainable)
+    if initial_hash != shared_meta['initial_adapter_sha256']:
+        raise RuntimeError('Loaded adapter tensors differ from the shared initialization')
+    print(f'Shared FP32 initialization verified: {initial_hash}', flush=True)
     save_json(out / 'model_inventory.json', dict(quantized_modules=quantized,
         adapter_target_matches=matched, trainable_parameters=[dict(name=n, shape=list(p.shape),
         dtype=str(p.dtype)) for n, p in trainable], trainable_parameter_count=sum(p.numel() for _, p in trainable),
         parameter_dtype_counts=dict(Counter(str(p.dtype) for p in model.parameters())),
         initial_adapter_sha256=initial_hash, gpu=torch.cuda.get_device_name(),
+        adapter_hash_schema=shared_init.HASH_SCHEMA,
         gpu_uuid=str(getattr(torch.cuda.get_device_properties(0), 'uuid', 'unavailable')),
         load_peak_allocated_bytes=load_peak, processor=processor.image_processor.to_dict()))
     optimizer = torch.optim.AdamW([p for _, p in trainable], lr=lr, weight_decay=0.0, foreach=False)
@@ -286,6 +310,8 @@ def run(args):
                   gradient_norm=float(norm.item()), gradient_parameter_count=len(gradients),
                   trainable_without_gradient=[n for n, p in trainable if p.grad is None],
                   initial_adapter_sha256=initial_hash, updated_adapter_sha256=final_hash,
+                  shared_init_weights_sha256=shared_meta['weights_sha256'],
+                  adapter_hash_schema=shared_init.HASH_SCHEMA,
                   peak_allocated_bytes=peak, peak_reserved_bytes=reserved,
                   qualification='Four training records only; not full-run memory or speed evidence',
                   adapter_saved=False)
@@ -298,6 +324,8 @@ def main():
     parser.add_argument('--mode', choices=['fp16', 'nf4'], required=True)
     parser.add_argument('--data', default='data/processed/mami_lora_qlora_seed42')
     parser.add_argument('--output', required=True)
+    parser.add_argument('--adapter-init', required=True,
+                        help='Shared initialization directory created from the previous smoke inventories')
     run(parser.parse_args())
 
 
