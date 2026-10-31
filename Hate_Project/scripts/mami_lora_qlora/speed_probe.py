@@ -16,6 +16,7 @@ import train_comparison as training
 
 
 VARIANTS = ('baseline', 'cached', 'answer-only', 'batch2')
+RUN_VARIANTS = VARIANTS + ('batch2-full',)
 
 
 def other_gpu_processes():
@@ -61,7 +62,15 @@ def combine_batches(entries, pad_token_id):
 def forward_loss(model, batch, answer_only, positions=None):
     import torch
     if not answer_only:
-        return model(**batch).loss
+        if batch['labels'].shape[0] == 1:
+            return model(**batch).loss
+        # Preserve the original mean of per-record losses when answer lengths differ.
+        inputs = {key: value for key, value in batch.items() if key != 'labels'}
+        logits = model(**inputs).logits[:, :-1].float()
+        targets = batch['labels'][:, 1:]
+        losses = torch.nn.functional.cross_entropy(logits.reshape(-1, logits.shape[-1]),
+            targets.reshape(-1), ignore_index=-100, reduction='none').view_as(targets)
+        return (losses.sum(dim=1) / (targets != -100).sum(dim=1)).mean()
     indices = torch.tensor(positions, dtype=torch.long, device=batch['input_ids'].device)
     inputs = {key: value for key, value in batch.items() if key != 'labels'}
     logits = model(**inputs, logits_to_keep=indices).logits
@@ -107,7 +116,7 @@ def run(args):
         args, data, out, complete, selected, purpose='speed_probe')
     import torch
     arrays, initial_meta = shared.load(args.adapter_init)
-    width = 2 if args.variant == 'batch2' else 1
+    width = 2 if args.variant in ('batch2', 'batch2-full') else 1
     answer_only = args.variant in ('answer-only', 'batch2')
     pad_id = processor.tokenizer.pad_token_id
     if pad_id is None:
@@ -133,7 +142,7 @@ def run(args):
 
     common.save_json(out / 'probe_configuration.json', dict(variant=args.variant,
         mode=args.mode, runner_sha256=common.digest(__file__), microbatch=width,
-        accumulation=48 // width, records_per_timing_pass=48, timing_passes=3,
+        accumulation=48 // width, records_per_timing_pass=48, timing_passes=args.repetitions,
         timing_input_signatures=signatures,
         correctness_policy='dropout disabled; same four training records; no optimizer step',
         timing_policy='dropout enabled; reset common initialization and fresh AdamW each pass',
@@ -175,7 +184,7 @@ def run(args):
     model.zero_grad(set_to_none=True)
     torch.cuda.synchronize()
     passes = []
-    for repetition in range(3):
+    for repetition in range(args.repetitions):
         competing = other_gpu_processes()
         if competing:
             raise RuntimeError(f'Another GPU process appeared: {competing}')
@@ -214,6 +223,35 @@ def run(args):
         print(json.dumps(result), flush=True)
         optimizer.zero_grad(set_to_none=True)
         del optimizer, scaler
+    stress = []
+    if args.stress_sample:
+        if width != 2:
+            raise ValueError('Sample memory check requires microbatch two')
+        # Bounded check of the existing sample, not an exhaustive dataset scan.
+        for metric in ('full_tokens', 'vision_patches'):
+            if other_gpu_processes():
+                raise RuntimeError('Another GPU process appeared before memory check')
+            ranked = sorted(selected + warmup, reverse=True,
+                key=lambda row: cached[id(row)][1]['full_tokens'] if metric == 'full_tokens'
+                else cached[id(row)][0]['pixel_values'].shape[0])[:2]
+            copy_initial(parameters, arrays)
+            optimizer = torch.optim.AdamW([p for _, p in parameters], lr=lr, weight_decay=0.0, foreach=False)
+            scaler = torch.amp.GradScaler('cuda', init_scale=1024.0)
+            torch.cuda.reset_peak_memory_stats()
+            batch, positions = get_batch(ranked, True)
+            with torch.autocast('cuda', dtype=torch.float16):
+                loss = forward_loss(model, batch, answer_only, positions)
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_([p for _, p in parameters], 1.0, error_if_nonfinite=True)
+            scaler.step(optimizer)
+            scaler.update()
+            torch.cuda.synchronize()
+            stress.append(dict(metric=metric, records=[cached[id(r)][1] for r in ranked],
+                peak_allocated_bytes=torch.cuda.max_memory_allocated(),
+                peak_reserved_bytes=torch.cuda.max_memory_reserved()))
+            optimizer.zero_grad(set_to_none=True)
+            del optimizer, scaler, loss, batch
     if other_gpu_processes():
         raise RuntimeError('Another GPU process appeared; timings require review')
     result = dict(mode=args.mode, variant=args.variant, microbatch=width, records_per_pass=48,
@@ -224,6 +262,9 @@ def run(args):
         timing_input_signatures=signatures,
         correctness_ids=[dict(original_id=r['original_id'], is_augmented=r['is_augmented']) for r in warmup],
         qualification='Disposable first optimizer steps, 48-record RAM cache, training-only inputs; not full-run throughput or bitwise equivalence',
+        sample_memory_checks=stress,
+        cached_sample_tensor_bytes=sum(t.numel()*t.element_size()
+            for batch, _ in cached.values() for t in batch.values()),
         adapter_saved=False)
     common.save_json(out / 'complete.json', result)
     print(json.dumps(result, indent=2))
@@ -236,7 +277,7 @@ def summarize(args):
         loaded = {}
         inventories = {}
         requests = {}
-        for variant in VARIANTS:
+        for variant in args.variants:
             folder = root / f'{mode}-{variant}'
             done = json.loads((folder / 'complete.json').read_text())
             if done['mode'] != mode or done['variant'] != variant:
@@ -246,8 +287,8 @@ def summarize(args):
             loaded[variant] = done
             requests[variant] = json.loads((folder / 'request.json').read_text())
             inventories[variant] = json.loads((folder / 'model_inventory.json').read_text())
-        baseline = loaded['baseline']
-        reference = root / f'{mode}-baseline' / 'correctness_gradients.npz'
+        baseline = loaded[args.reference]
+        reference = root / f'{mode}-{args.reference}' / 'correctness_gradients.npz'
         comparisons = {}
         with np.load(reference, allow_pickle=False) as original_gradients:
             denominator = sum(float(np.square(original_gradients[n].astype(np.float64)).sum()) for n in original_gradients.files)
@@ -257,10 +298,10 @@ def summarize(args):
                         raise ValueError(f'Benchmark control differs: {key}')
                 for key in ('checkpoint', 'versions', 'lora', 'prepared_complete_sha256',
                             'max_pixels', 'min_pixels', 'gradient_checkpointing', 'shared_init_weights_sha256'):
-                    if requests[variant][key] != requests['baseline'][key]:
+                    if requests[variant][key] != requests[args.reference][key]:
                         raise ValueError(f'Request control differs: {key}')
                 for key in ('gpu', 'gpu_uuid', 'processor', 'quantized_modules', 'trainable_parameters'):
-                    if inventories[variant][key] != inventories['baseline'][key]:
+                    if inventories[variant][key] != inventories[args.reference][key]:
                         raise ValueError(f'Model inventory differs: {key}')
                 with np.load(root / f'{mode}-{variant}' / 'correctness_gradients.npz', allow_pickle=False) as gradients:
                     if set(gradients.files) != set(original_gradients.files):
@@ -279,6 +320,9 @@ def summarize(args):
                     correctness_loss_delta=result['correctness_mean_record_loss']-baseline['correctness_mean_record_loss'],
                     gradient_relative_l2=(numerator/denominator)**.5 if denominator else None,
                     gradient_max_absolute_difference=maximum,
+                    reference_variant=args.reference,
+                    sample_memory_checks=result.get('sample_memory_checks', []),
+                    cached_sample_tensor_bytes=result.get('cached_sample_tensor_bytes'),
                     qualification='Review numerical differences; no automatic equivalence claim or variant selection')
         report[mode] = comparisons
     common.save_json(Path(args.output), report)
@@ -290,12 +334,16 @@ def main():
     commands = parser.add_subparsers(dest='command', required=True)
     probe = commands.add_parser('run')
     probe.add_argument('--mode', choices=['fp16', 'nf4'], required=True)
-    probe.add_argument('--variant', choices=VARIANTS, required=True)
+    probe.add_argument('--variant', choices=RUN_VARIANTS, required=True)
+    probe.add_argument('--repetitions', type=int, choices=(1, 3), default=3)
+    probe.add_argument('--stress-sample', action='store_true')
     probe.add_argument('--data', default='data/processed/mami_lora_qlora_seed42')
     probe.add_argument('--adapter-init', default='results/mami_lora_qlora/shared_init_seed42')
     probe.add_argument('--output', required=True)
     summary = commands.add_parser('summarize')
     summary.add_argument('--root', default='results/mami_lora_qlora/speed-probe-v1')
+    summary.add_argument('--variants', nargs='+', choices=RUN_VARIANTS, default=VARIANTS)
+    summary.add_argument('--reference', choices=RUN_VARIANTS, default='baseline')
     summary.add_argument('--output', default='results/mami_lora_qlora/speed-probe-v1/summary.json')
     args = parser.parse_args()
     (run if args.command == 'run' else summarize)(args)

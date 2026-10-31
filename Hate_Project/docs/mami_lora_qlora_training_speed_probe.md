@@ -104,7 +104,45 @@ passed as the launcher's first argument for an approved deliberate retry.
 Nice values are recorded in probe metadata. Compare variant timing under the
 same CPU contention/allocation conditions. Three passes and a fixed variant order
 do not remove thermal drift, allocator/kernel warm-up effects or workload
-representativeness limits. No speedup has been measured yet.
+representativeness limits.
+
+## Approved short follow-up: full-logit microbatch two
+
+The first server probe completed. Cached microbatch one took 43.55 seconds for
+FP16 and 48.04 seconds for NF4 per 48 records. Cached answer-only microbatch two
+took 27.08 and 29.36 seconds, respectively, but answer-only microbatch one did
+not improve on caching alone and changed gradients in the four-record check.
+
+The approved follow-up isolates microbatch two with full logits. On the user's
+request to keep it short, run only cached microbatch one and `batch2-full`, in
+both modes, with one timed 48-record update per configuration. Retain the same
+four-record dropout-disabled gradient comparison. The full-logit batched loss
+averages token losses within each record, then averages records, preserving the
+original training objective with unequal label lengths. This is not token-mean
+batch loss. Dropout remains enabled during timing; bitwise agreement is not an
+acceptance requirement and numerical differences must be reviewed.
+
+```bash
+bash scripts/mami_lora_qlora/run_quick_batch2_probe.sh
+```
+
+The new launcher uses nice 19, four fresh sequential model loads, a separate
+`results/mami_lora_qlora/quick-batch2-v1` root, and the existing GPU-occupancy guard.
+Expect several minutes rather than the previous eight-run, three-repeat probe;
+one timing pass has greater uncertainty. It does not rerun the old probe or
+modify the full training runner. Summary speedups use `cached` as the reference.
+
+After timing each batch-two configuration, perform two disposable training
+updates using the two largest token sequences and the two largest vision-patch
+inputs in the same 52-record sample. Report allocated/reserved memory and chosen
+record metadata. These checks include optimizer state and stop on OOM or
+nonfinite gradients. They are sample checks, not a worst-case full-dataset memory
+guarantee. Report the sample's CPU tensor bytes; do not extrapolate this small
+sample into permission to cache all 18,000 records. The exhaustive dataset scan
+and full-cache allocation are deliberately omitted to keep this follow-up short.
+
+Review speed, memory and gradients before selecting an implementation for the
+full matched runs. A bounded full-run preprocessing strategy remains unresolved.
 
 Source references:
 
