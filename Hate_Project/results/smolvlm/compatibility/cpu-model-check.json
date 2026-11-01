@@ -1,0 +1,45 @@
+{
+  "model": "HuggingFaceTB/SmolVLM-256M-Instruct",
+  "revision": "7e3e67edbbed1bf9888184d9df282b700a323964",
+  "versions": {
+    "torch": "2.5.1",
+    "transformers": "4.57.1",
+    "peft": "0.17.1",
+    "accelerate": "1.10.1",
+    "bitsandbytes": "0.42.0",
+    "numpy": "1.26.4",
+    "Pillow": "11.3.0",
+    "huggingface-hub": "0.36.2",
+    "pandas": "2.3.2"
+  },
+  "device": "cpu",
+  "dtype": "float32",
+  "parameter_count": 256484928,
+  "input_shapes": {
+    "pixel_values": [
+      1,
+      13,
+      3,
+      512,
+      512
+    ],
+    "pixel_attention_mask": [
+      1,
+      13,
+      512,
+      512
+    ],
+    "input_ids": [
+      1,
+      875
+    ],
+    "attention_mask": [
+      1,
+      875
+    ]
+  },
+  "raw_answer": " In this image, we",
+  "generated_tokens": 5,
+  "inference_seconds": 57.4858512300998,
+  "qualification": "Synthetic image, real pretrained weights; not a quality benchmark or GPU/NF4 feasibility gate"
+}
