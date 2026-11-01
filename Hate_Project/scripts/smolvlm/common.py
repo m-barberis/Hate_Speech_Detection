@@ -3,6 +3,7 @@
 Heavy dependencies are lazy so planning/help and early-stopping tests need no GPU.
 """
 import hashlib
+from copy import copy
 import importlib.util
 import json
 import math
@@ -14,6 +15,7 @@ import sys
 
 MODEL = 'HuggingFaceTB/SmolVLM-256M-Instruct'
 REVISION = '7e3e67edbbed1bf9888184d9df282b700a323964'
+RESULTS_ROOT = 'results/smolvlm-optimized-v1'
 LEGACY = Path(__file__).resolve().parents[1] / 'mami_lora_qlora'
 CONDITIONS = ('clean_image_only', 'overlay_image_only',
               'clean_with_transcription', 'overlay_with_transcription')
@@ -80,7 +82,11 @@ def seed():
 
 def processor_load():
     from transformers import AutoProcessor
-    processor = AutoProcessor.from_pretrained(MODEL, revision=REVISION,
+    from huggingface_hub import snapshot_download
+    # Resolve an absolute cached snapshot first. Older AutoProcessor discovery
+    # can otherwise probe unpinned 'main' even with local_files_only requested.
+    folder = snapshot_download(MODEL, revision=REVISION, local_files_only=True)
+    processor = AutoProcessor.from_pretrained(folder,
         local_files_only=True, trust_remote_code=False)
     # Keep the checkpoint's native resizing/cropping, not Qwen's pixel controls.
     processor.tokenizer.padding_side = 'right'
@@ -130,7 +136,7 @@ def adapter_hash(parameters):
         (n, p.detach().float().cpu().numpy()) for n, p in parameters)
 
 
-def attach_adapter(model):
+def attach_adapter(model, gradient_checkpointing=False):
     import torch
     from peft import LoraConfig, get_peft_model
     matched = [n for n, _ in model.named_modules() if n.rsplit('.', 1)[-1] in TARGETS]
@@ -147,7 +153,10 @@ def attach_adapter(model):
             parameter.data = torch.from_numpy(arrays[name]).to(parameter.device)
     initial_hash = adapter_hash(trainable)
     model.config.use_cache = False
-    model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={'use_reentrant': False})
+    if gradient_checkpointing:
+        model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={'use_reentrant': False})
+    else:
+        model.gradient_checkpointing_disable()
     model.train()
     return model, trainable, dict(initial_adapter_sha256=initial_hash,
         adapter_targets=matched, lora=LORA,
@@ -162,6 +171,37 @@ def messages(row):
                  dict(type='text', text=row['system_prompt'] + '\n\n' + row['user_prompt'])])]
 
 
+class RecordImageCache:
+    """Reuse one native image preprocessing result within one record only.
+
+    Each native processor call still expands image tokens and tokenizes text.
+    A shallow processor copy owns this proxy; the shared processor is untouched.
+    """
+    def __init__(self, image_processor):
+        self.original = image_processor
+        self.key = None
+        self.cached = None
+
+    def __getattr__(self, name):
+        return getattr(self.original, name)
+
+    def __call__(self, images, **kwargs):
+        key = (tuple(tuple(id(image) for image in group) for group in images), repr(kwargs))
+        if self.cached is None:
+            self.key = key
+            self.cached = self.original(images, **kwargs)
+        elif key != self.key:
+            raise ValueError('Per-record image cache received different images/settings')
+        # The processor may pop rows/cols. Never expose the cached mapping itself.
+        return dict(self.cached)
+
+
+def record_processor(processor):
+    result = copy(processor)
+    result.image_processor = RecordImageCache(processor.image_processor)
+    return result
+
+
 def prompt_inputs(processor, row):
     from PIL import Image
     if digest(row['image_path']) != row['image_sha256']:
@@ -173,6 +213,7 @@ def prompt_inputs(processor, row):
 
 
 def make_batch(processor, row):
+    processor = record_processor(processor)
     prompt, image = prompt_inputs(processor, row)
     text = processor.apply_chat_template(messages(row) + [dict(role='assistant',
         content=[dict(type='text', text=row['target'])])],
@@ -195,7 +236,7 @@ def make_batch(processor, row):
     for key, value in sorted(full.items()):
         signature.update(key.encode())
         signature.update(str((list(value.shape), str(value.dtype))).encode())
-        signature.update(value.contiguous().numpy().tobytes())
+        signature.update(memoryview(value.contiguous().numpy()).cast('B'))
     return full, dict(original_id=row['original_id'], is_augmented=row['is_augmented'],
         prompt_tokens=n, full_tokens=len(ids), supervised_tokens=int((labels != -100).sum()),
         decoded_supervision=suffix, input_signature=signature.hexdigest(),

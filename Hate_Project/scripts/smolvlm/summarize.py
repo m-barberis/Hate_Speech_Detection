@@ -50,8 +50,8 @@ def summarize(root):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--root', default='results/smolvlm/test')
-    parser.add_argument('--output', default='results/smolvlm/test/summary.json')
+    parser.add_argument('--root', default=f'{c.RESULTS_ROOT}/test')
+    parser.add_argument('--output', default=f'{c.RESULTS_ROOT}/test/summary.json')
     args = parser.parse_args()
     result = summarize(Path(args.root))
     c.save_json(args.output, result)

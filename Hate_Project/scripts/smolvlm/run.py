@@ -1,5 +1,6 @@
 """Matched SmolVLM-256M feasibility checks, early-stopped training and evaluation."""
 import argparse
+from contextlib import closing
 from dataclasses import dataclass, asdict
 import json
 import platform
@@ -13,7 +14,6 @@ MAX_EPOCHS = 3
 EVAL_STEPS = 75
 PATIENCE = 3
 MICROBATCH = 2
-ACCUMULATION = 24
 BATCH = 48
 LR = 2e-4
 
@@ -48,13 +48,24 @@ def order(count, epoch):
     return indices
 
 
-def control(data):
+def execution_settings(args=None):
+    microbatch = getattr(args, 'microbatch', MICROBATCH)
+    if microbatch not in (2, 4, 8) or BATCH % microbatch:
+        raise ValueError('Microbatch must be 2, 4 or 8 and divide effective batch 48')
+    return dict(microbatch=microbatch, accumulation=BATCH//microbatch,
+        gradient_checkpointing=getattr(args, 'gradient_checkpointing', False),
+        cpu_threads=getattr(args, 'cpu_threads', 2), prefetch_depth=2,
+        image_preprocessing='once per record with native processor; exact prefix checks')
+
+
+def control(data, args=None):
+    execution = execution_settings(args)
     return dict(model=c.MODEL, revision=c.REVISION, versions=c.versions(), lora=c.LORA,
         data=data, image_policy='native processor defaults, no truncation',
         prompt_policy='system instruction prepended verbatim to user text',
         quantization=dict(type='nf4', compute='float16', double_quant=False,
                           scope='eligible linear modules including vision'),
-        seed=42, microbatch=MICROBATCH, accumulation=ACCUMULATION, effective_batch=BATCH,
+        seed=42, **execution, effective_batch=BATCH,
         learning_rate=LR, max_epochs=MAX_EPOCHS, eval_steps=EVAL_STEPS, patience=PATIENCE,
         monitor='mean macro-F1 clean/overlay with transcription', min_delta=0.0,
         lr_schedule='linear decay over maximum 1125 updates, no warmup')
@@ -127,7 +138,7 @@ def preflight(args):
         entries = [c.make_batch(processor, row) for row in selected[offset:offset+2]]
         c.combine_batches(entries, processor.tokenizer.pad_token_id)
         audits.extend(audit for _, audit in entries)
-    result = dict(controls=control(data), selected_input_audits=audits,
+    result = dict(controls=control(data, args), selected_input_audits=audits,
         maximum_optimizer_steps=len(records)//BATCH*MAX_EPOCHS)
     print(json.dumps(result, indent=2))
     if args.output:
@@ -144,7 +155,7 @@ def setup(args, controls):
     c.seed()
     processor = c.processor_load()
     model, quantized = c.model_load(args.mode)
-    model, trainable, inventory = c.attach_adapter(model)
+    model, trainable, inventory = c.attach_adapter(model, controls['gradient_checkpointing'])
     inventory.update(quantized_modules=quantized, processor=processor.image_processor.to_dict(),
         gpu=torch.cuda.get_device_name(), gpu_uuid=str(getattr(torch.cuda.get_device_properties(0),
         'uuid', 'unavailable')), versions=c.versions())
@@ -168,7 +179,7 @@ def optimizer_step(model, trainable, optimizer, scaler):
         raise RuntimeError('No nonzero adapter gradients')
     scaler.step(optimizer)
     scaler.update()
-    if any(not torch.isfinite(p).all().item() for _, p in trainable):
+    if not torch.stack([torch.isfinite(p).all() for _, p in trainable]).all().item():
         raise RuntimeError('Non-finite updated adapter tensors')
     optimizer.zero_grad(set_to_none=True)
     return float(norm)
@@ -178,15 +189,25 @@ def smoke(args):
     import torch
     records, _, data = c.load_data(args.data, args.validation)
     selected = c.legacy('training_smoke').select_smoke_records(records)
-    controls = control(data)
+    controls = control(data, args)
+    microbatch = controls['microbatch']
+    # Exercise the selected microbatch size, not just two rows in an eight-row run.
+    chosen_ids = {(r['original_id'], r['is_augmented']) for r in selected}
+    for row in records:
+        if len(selected) >= max(4, microbatch):
+            break
+        identity = row['original_id'], row['is_augmented']
+        if identity not in chosen_ids:
+            selected.append(row)
+            chosen_ids.add(identity)
     out, processor, model, trainable, inventory = setup(args, controls)
     optimizer = torch.optim.AdamW([p for _, p in trainable], lr=LR, weight_decay=0.0, foreach=False)
     scaler = torch.amp.GradScaler('cuda', init_scale=1024.0)
     batching = c.legacy('training_batches')
     audits, losses = [], []
     torch.cuda.reset_peak_memory_stats()
-    for offset in (0, 2):
-        entries = [c.make_batch(processor, row) for row in selected[offset:offset+2]]
+    for offset in range(0, len(selected), microbatch):
+        entries = [c.make_batch(processor, row) for row in selected[offset:offset+microbatch]]
         audits.extend(audit for _, audit in entries)
         batch = c.combine_batches(entries, processor.tokenizer.pad_token_id).to('cuda')
         with torch.autocast('cuda', dtype=torch.float16):
@@ -194,7 +215,7 @@ def smoke(args):
         if not torch.isfinite(loss).item():
             raise RuntimeError('Non-finite smoke loss')
         losses.append(float(loss))
-        scaler.scale(loss / 2).backward()
+        scaler.scale(loss * len(entries) / len(selected)).backward()
         del batch, loss, entries
     norm = optimizer_step(model, trainable, optimizer, scaler)
     if c.adapter_hash(trainable) == inventory['initial_adapter_sha256']:
@@ -212,7 +233,7 @@ def smoke(args):
         initial_adapter_sha256=inventory['initial_adapter_sha256'],
         input_audits=audits, losses=losses, gradient_norm=norm, optimizer_steps=1,
         generated_answer=raw, peak_allocated_bytes=torch.cuda.max_memory_allocated(),
-        qualification='Four training records only; does not prove worst-case memory or convergence'))
+        qualification='Small training-only sample at selected microbatch; not worst-case memory proof'))
 
 
 def verify_gates(args, controls):
@@ -270,8 +291,9 @@ def restore(model, folder):
 
 def train(args):
     import torch
+    import training_engine as engine
     records, conditions, data = c.load_data(args.data, args.validation)
-    controls = control(data)
+    controls = control(data, args)
     initial_hash = verify_gates(args, controls)
     out, processor, model, trainable, inventory = setup(args, controls)
     if inventory['initial_adapter_sha256'] != initial_hash:
@@ -286,45 +308,27 @@ def train(args):
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lambda step: 1-step/maximum_steps)
     scaler = torch.amp.GradScaler('cuda', init_scale=1024.0)
     stopping = EarlyStopping()
-    batching = c.legacy('training_batches')
     step, training_seconds, validation_seconds, peak = 0, 0.0, 0.0, 0
     stopped = False
-    # Synchronous preprocessing avoids simultaneous access to the processor during validation.
     with (out/'steps.jsonl').open('x') as log, (out/'validation.jsonl').open('x') as validation_log:
         for epoch in range(1, MAX_EPOCHS+1):
             indices = order(len(records), epoch)
-            for start in range(0, len(indices), BATCH):
-                c.gpu_free()
-                torch.cuda.synchronize()
-                torch.cuda.reset_peak_memory_stats()
-                started = time.perf_counter()
-                losses = []
-                for offset in range(0, BATCH, MICROBATCH):
-                    chosen = indices[start+offset:start+offset+MICROBATCH]
-                    entries = [c.make_batch(processor, records[i]) for i in chosen]
-                    batch = c.combine_batches(entries, processor.tokenizer.pad_token_id).to('cuda')
-                    with torch.autocast('cuda', dtype=torch.float16):
-                        record_losses = batching.full_record_losses(model, batch)
-                        loss = record_losses.mean()
-                    if not torch.isfinite(loss).item():
-                        raise RuntimeError('Non-finite training loss')
-                    losses.extend(record_losses.detach().float().cpu().tolist())
-                    scaler.scale(loss/ACCUMULATION).backward()
-                    del batch, entries, record_losses, loss
-                norm = optimizer_step(model, trainable, optimizer, scaler)
-                used_lr = optimizer.param_groups[0]['lr']
-                scheduler.step()
-                step += 1
-                torch.cuda.synchronize()
-                seconds = time.perf_counter()-started
-                training_seconds += seconds
-                peak = max(peak, torch.cuda.max_memory_allocated())
-                log.write(json.dumps(dict(step=step, epoch=epoch, mean_loss=sum(losses)/len(losses),
-                    gradient_norm=norm, learning_rate=used_lr, wall_seconds=seconds,
-                    peak_allocated_bytes=torch.cuda.max_memory_allocated())) + '\n')
-                log.flush()
-                if step == 1 or step % 10 == 0:
-                    print(f'Epoch {epoch}/{MAX_EPOCHS}, step {step}/{maximum_steps}, loss={sum(losses)/len(losses):.4f}', flush=True)
+            for window in engine.validation_windows(indices):
+                window_started = time.perf_counter()
+                with closing(engine.updates(model, processor, records, window, trainable,
+                        optimizer, scaler, scheduler, controls['microbatch'], step,
+                        optimizer_step)) as updates:
+                    for item in updates:
+                        step = item['step']
+                        peak = max(peak, item['peak_allocated_bytes'])
+                        log.write(json.dumps(dict(item, epoch=epoch)) + '\n')
+                        log.flush()
+                        if step == 1 or step % 10 == 0:
+                            print(f'Epoch {epoch}/{MAX_EPOCHS}, step {step}/{maximum_steps}, '
+                                  f'loss={item["mean_loss"]:.4f}, wall={item["wall_seconds"]:.1f}s, '
+                                  f'CPU wait={item["cpu_wait_seconds"]:.1f}s', flush=True)
+                # Join the producer before using the same processor in validation.
+                training_seconds += time.perf_counter()-window_started
                 if step % EVAL_STEPS == 0:
                     started = time.perf_counter()
                     summary = c.evaluate(model, processor, conditions, out/f'validation-step-{step}')
@@ -352,6 +356,33 @@ def train(args):
         request_sha256=c.digest(out/'request.json'), training_plan_sha256=c.digest(out/'training_plan.json'),
         training_wall_seconds=training_seconds, validation_wall_seconds=validation_seconds,
         peak_training_allocated_bytes=peak, restored_best=True))
+
+
+def profile(args):
+    """Disposable training-only timing; never creates a successful smoke gate."""
+    import statistics
+    import torch
+    import training_engine as engine
+    records, _, data = c.load_data(args.data, args.validation)
+    controls = control(data, args)
+    out, processor, model, trainable, _ = setup(args, controls)
+    indices = order(len(records), 1)[:BATCH*args.profile_updates]
+    optimizer = torch.optim.AdamW([p for _, p in trainable], lr=LR, weight_decay=0.0, foreach=False)
+    scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lambda step: 1-step/1125)
+    scaler = torch.amp.GradScaler('cuda', init_scale=1024.0)
+    rows = []
+    started = time.perf_counter()
+    with closing(engine.updates(model, processor, records, indices, trainable, optimizer,
+            scaler, scheduler, controls['microbatch'], 0, optimizer_step)) as updates:
+        for item in updates:
+            rows.append(item)
+            print(json.dumps(item), flush=True)
+    c.save_json(out/'profile.json', dict(mode=args.mode, controls=controls, steps=rows,
+        loop_wall_seconds=time.perf_counter()-started,
+        median_update_seconds=statistics.median(r['wall_seconds'] for r in rows),
+        median_after_first_update_seconds=statistics.median(r['wall_seconds'] for r in rows[1:]),
+        peak_allocated_bytes=max(r['peak_allocated_bytes'] for r in rows),
+        qualification='Training-only sample; not convergence, worst-case memory or a full training gate'))
 
 
 def training_gate(root, mode):
@@ -414,30 +445,40 @@ def evaluate_test(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command', choices=['check', 'cache', 'preflight', 'smoke', 'train', 'evaluate'])
+    parser.add_argument('command', choices=['check', 'cache', 'preflight', 'smoke', 'profile', 'train', 'evaluate'])
     parser.add_argument('--mode', choices=['fp16', 'nf4'])
     parser.add_argument('--output')
     parser.add_argument('--data', default='data/processed/mami_lora_qlora_seed42')
     parser.add_argument('--validation', default='data/processed/mami_lora_qlora_validation_seed42')
-    parser.add_argument('--smoke-fp16', default='results/smolvlm/smoke-fp16')
-    parser.add_argument('--smoke-nf4', default='results/smolvlm/smoke-nf4')
-    parser.add_argument('--fp16-training', default='results/smolvlm/fp16-training')
-    parser.add_argument('--nf4-training', default='results/smolvlm/nf4-training')
+    parser.add_argument('--smoke-fp16', default=f'{c.RESULTS_ROOT}/smoke-fp16')
+    parser.add_argument('--smoke-nf4', default=f'{c.RESULTS_ROOT}/smoke-nf4')
+    parser.add_argument('--fp16-training', default=f'{c.RESULTS_ROOT}/fp16-training')
+    parser.add_argument('--nf4-training', default=f'{c.RESULTS_ROOT}/nf4-training')
     parser.add_argument('--test-data', default='data/processed/mami_lora_qlora_test_seed42')
     parser.add_argument('--arm', choices=['fp16-base', 'nf4-base', 'fp16-lora', 'nf4-qlora'])
+    parser.add_argument('--microbatch', type=int, choices=[2, 4, 8], default=2)
+    parser.add_argument('--gradient-checkpointing', action='store_true',
+                        help='Enable activation recomputation to trade speed for memory')
+    parser.add_argument('--cpu-threads', type=int, default=2)
+    parser.add_argument('--profile-updates', type=int, choices=range(2, 6), default=2)
     args = parser.parse_args()
-    if args.command in ('smoke', 'train', 'evaluate') and not args.output:
+    if args.command in ('smoke', 'profile', 'train', 'evaluate') and not args.output:
         parser.error('--output is required')
-    if args.command in ('smoke', 'train') and not args.mode:
+    if args.command in ('smoke', 'profile', 'train') and not args.mode:
         parser.error('--mode is required')
     if args.command == 'evaluate' and not args.arm:
         parser.error('--arm is required')
+    if args.cpu_threads < 1:
+        parser.error('--cpu-threads must be positive')
     out = Path(args.output).resolve() if args.output else None
     if out and out.exists():
         raise FileExistsError(f'Preserve existing output: {out}')
     try:
+        if args.command in ('preflight', 'smoke', 'profile', 'train', 'evaluate'):
+            import torch
+            torch.set_num_threads(args.cpu_threads)
         dict(check=check, cache=cache, preflight=preflight, smoke=smoke,
-             train=train, evaluate=evaluate_test)[args.command](args)
+             profile=profile, train=train, evaluate=evaluate_test)[args.command](args)
     except BaseException as error:
         if out and out.is_dir() and (out/'request.json').exists():
             c.save_json(out/'failure.json', dict(type=type(error).__name__, message=str(error)))

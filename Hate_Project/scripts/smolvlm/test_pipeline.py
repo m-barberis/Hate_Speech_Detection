@@ -5,10 +5,24 @@ import unittest
 import importlib.util
 
 import common as c
-from run import EarlyStopping, order
+from run import EarlyStopping, order, execution_settings
 
 
 class ControlTests(unittest.TestCase):
+    def test_validation_windows_and_effective_batch_are_preserved(self):
+        from types import SimpleNamespace
+        from training_engine import validation_windows
+        indices = order(18000, 1)
+        windows = validation_windows(indices)
+        self.assertEqual([len(w) for w in windows], [3600]*5)
+        self.assertEqual([i for window in windows for i in window], indices)
+        for microbatch in (2, 4, 8):
+            settings = execution_settings(SimpleNamespace(microbatch=microbatch))
+            self.assertEqual(settings['microbatch']*settings['accumulation'], 48)
+            self.assertFalse(settings['gradient_checkpointing'])
+        with self.assertRaises(ValueError):
+            execution_settings(SimpleNamespace(microbatch=5))
+
     def test_summary_rejects_unpaired_inputs_and_changed_metrics(self):
         import json
         from summarize import ARMS, summarize
@@ -82,6 +96,156 @@ HAS_TORCH_STACK = all(importlib.util.find_spec(p) for p in ('torch', 'transforme
 
 @unittest.skipUnless(HAS_TORCH_STACK, 'Requires the server PyTorch/Transformers/PEFT stack')
 class ArchitectureTests(unittest.TestCase):
+    def test_training_closes_worker_before_validation_and_stops_at_300(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        import torch
+        import run
+        import training_engine as engine
+        worker_active = [False]
+        windows = []
+        model = torch.nn.Linear(1, 1)
+        records = [dict(original_id=str(i), is_augmented=False) for i in range(18000)]
+        conditions = {name: [] for name in c.CONDITIONS}
+
+        def updates(*args):
+            indices, first_step = args[3], args[9]
+            windows.append(list(indices))
+            worker_active[0] = True
+            try:
+                for i in range(len(indices)//48):
+                    yield dict(step=first_step+i+1, mean_loss=.5, wall_seconds=1.,
+                               cpu_wait_seconds=0., peak_allocated_bytes=1)
+            finally:
+                worker_active[0] = False
+
+        def evaluate(*args):
+            self.assertFalse(worker_active[0])
+            return {name: dict(macro_f1=.6) for name in c.CONDITIONS}
+
+        def checkpoint(model, processor, folder, step, score, controls):
+            folder.mkdir()
+            c.save_json(folder/'complete.json', dict(step=step))
+
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            c.save_json(root/'request.json', {})
+            for mode in ('fp16', 'nf4'):
+                (root/mode).mkdir()
+                c.save_json(root/mode/'complete.json', {})
+            args = SimpleNamespace(data='unused', validation='unused', mode='fp16',
+                smoke_fp16=str(root/'fp16'), smoke_nf4=str(root/'nf4'))
+            with patch.object(c, 'load_data', return_value=(records, conditions, {})), patch.object(
+                    run, 'verify_gates', return_value='init'), patch.object(run, 'setup',
+                    return_value=(root, None, model, list(model.named_parameters()),
+                                  dict(initial_adapter_sha256='init'))), patch.object(
+                    engine, 'updates', side_effect=updates), patch.object(c, 'evaluate', side_effect=evaluate), patch.object(
+                    run, 'checkpoint', side_effect=checkpoint), patch.object(run, 'restore',
+                    return_value=dict(adapter_sha256='best')) as restore, patch.object(torch.amp, 'GradScaler'):
+                run.train(args)
+            done = c.read_json(root/'complete.json')
+            self.assertEqual(done['optimizer_steps'], 300)
+            self.assertEqual(done['best_step'], 75)
+            self.assertTrue(done['early_stopped'])
+            restore.assert_called_once_with(model, root/'checkpoint-step-75')
+            self.assertEqual([i for w in windows for i in w], run.order(18000, 1)[:14400])
+
+    def test_preprocessing_once_is_exactly_equal_to_original_two_calls(self):
+        from unittest.mock import patch
+        from PIL import Image
+        import torch
+        torch.set_num_threads(2)
+        try:
+            processor = c.processor_load()
+        except OSError:
+            self.skipTest('Pinned tokenizer/processor not cached')
+        original = processor.image_processor
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp)/'image.png'
+            # Non-uniform pixels exercise resizing, splitting and normalization.
+            image = Image.new('RGB', (96, 64), (60, 100, 150))
+            image.paste((220, 30, 50), (20, 10, 70, 40))
+            image.save(path)
+            for target in ('clean', 'misogynous'):
+                row = dict(original_id='example', is_augmented=False,
+                    image_path=str(path), image_sha256=c.digest(path),
+                    system_prompt='Classify this meme.', user_prompt='Return the label.', target=target)
+                with patch.object(original, 'preprocess', wraps=original.preprocess) as calls:
+                    optimized, optimized_audit = c.make_batch(processor, row)
+                    self.assertEqual(calls.call_count, 1)
+                with patch.object(c, 'record_processor', side_effect=lambda p: p), patch.object(
+                        original, 'preprocess', wraps=original.preprocess) as calls:
+                    reference, reference_audit = c.make_batch(processor, row)
+                    self.assertEqual(calls.call_count, 2)
+                self.assertIs(processor.image_processor, original)
+                self.assertEqual(optimized_audit, reference_audit)
+                self.assertEqual(set(optimized), set(reference))
+                for key in optimized:
+                    self.assertTrue(torch.equal(optimized[key], reference[key]), key)
+
+    def test_prefetch_updates_preserve_record_weighting_and_close_producer(self):
+        from contextlib import nullcontext
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        import threading
+        import torch
+        import training_engine as engine
+        batching = c.legacy('training_batches')
+        torch.set_num_threads(2)
+
+        class Batch(dict):
+            def to(self, device):
+                return self
+
+        class Event:
+            def __init__(self, **kwargs):
+                pass
+            def record(self):
+                pass
+            def elapsed_time(self, other):
+                return 0.0
+
+        class Scaler:
+            def scale(self, loss):
+                return loss
+
+        records = [dict(original_id=str(i), is_augmented=False, value=i/48) for i in range(48)]
+        def prepare(processor, row):
+            return {'x': torch.tensor([[row['value']]])}, row
+        def combine(entries, pad_id):
+            return Batch(x=torch.cat([b['x'] for b, _ in entries]))
+        def record_losses(model, batch):
+            return ((model(batch['x'])-.5*batch['x'])**2).flatten()
+        def update(model, trainable, optimizer, scaler):
+            norm = float(trainable[0][1].grad.norm())
+            optimizer.step()
+            optimizer.zero_grad(set_to_none=True)
+            return norm
+
+        weights = []
+        for microbatch in (2, 4, 8):
+            model = torch.nn.Linear(1, 1, bias=False)
+            with torch.no_grad():
+                model.weight.fill_(.3)
+            optimizer = torch.optim.SGD(model.parameters(), lr=.1)
+            scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lambda step: 1)
+            with patch.object(c, 'make_batch', side_effect=prepare), patch.object(
+                    c, 'combine_batches', side_effect=combine), patch.object(c, 'gpu_free'), patch.object(
+                    c, 'legacy', return_value=SimpleNamespace(prefetched=batching.prefetched,
+                    full_record_losses=record_losses)), patch.object(torch, 'autocast',
+                    side_effect=lambda *a, **k: nullcontext()), patch.object(torch.cuda, 'synchronize'), patch.object(
+                    torch.cuda, 'reset_peak_memory_stats'), patch.object(torch.cuda, 'Event', Event), patch.object(
+                    torch.cuda, 'max_memory_allocated', return_value=0):
+                rows = list(engine.updates(model, SimpleNamespace(tokenizer=SimpleNamespace(pad_token_id=0)),
+                    records, list(range(48)), list(model.named_parameters()), optimizer, Scaler(),
+                    scheduler, microbatch, 74, update))
+            self.assertEqual(rows[0]['step'], 75)
+            self.assertEqual(rows[0]['records_in_update'], 48)
+            self.assertFalse(any(t.name.startswith('mami-input') for t in threading.enumerate()))
+            weights.append(float(model.weight.detach()))
+        for weight in weights[1:]:
+            self.assertAlmostEqual(weight, weights[0], places=6)
+
     def test_cached_real_processor_supervision_and_crop_padding(self):
         from PIL import Image
         try:

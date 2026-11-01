@@ -6,6 +6,11 @@ checks without improvement, select/restore the best validation checkpoint.
 Environment compatibility must be checked before training. Existing MemeLens
 code and outputs remain unchanged.
 
+The user approved local performance changes after observing 84–91 seconds per
+update. **Do not connect to the server through SSH, scp, rsync, or another remote
+access method without first asking the user.** The optimized implementation is
+verified locally; the previous server reports below describe the original code.
+
 ## Question and interpretation
 
 Can a compact general VLM learn MAMI misogyny classification and emoji-overlay
@@ -56,10 +61,17 @@ is preserved under overlays. Test data is loaded only by the evaluation command;
 no test metric selects the recipe or a checkpoint.
 
 Training: seed 42, microbatch 2, accumulation 24, effective batch 48,
-375 updates per epoch, at most 1125 updates. LoRA rank 16, alpha 32, dropout
+375 updates per epoch, at most 1125 updates. Microbatch remains 2 by default;
+explicit `--microbatch 4` or `--microbatch 8` derives accumulation 12 or 6,
+respectively, preserving the same 48 ordered records and equal per-record loss
+weight in every update. These larger settings require new FP16/NF4 smoke gates.
+LoRA rank 16, alpha 32, dropout
 0.05, AdamW learning rate 2e-4, weight decay 0, default betas/epsilon, gradient
 clipping 1, FP16 autocast and FP32 adapters. Freeze base weights without upcasting
-the whole base to FP32. Use nonreentrant gradient checkpointing. The learning
+the whole base to FP32. Gradient checkpointing is disabled by default to avoid
+activation recomputation. `--gradient-checkpointing` explicitly enables the
+previous nonreentrant policy when memory requires it; apply the same setting to
+both arms and regenerate their gates. No automatic OOM fallback. The learning
 rate decays linearly over the maximum 1125 steps without warmup.
 
 Target existing attention/MLP projections in text and vision plus embedding/head:
@@ -80,9 +92,23 @@ No epoch-end duplicate validation and no fixed epoch-two selection. Each arm
 may stop at a different step. Report this when comparing runtime and quality.
 The full validation grid can be a substantial part of runtime.
 
-Synchronous preprocessing avoids concurrent access to the processor while
-validation runs. This differs from MemeLens's CPU prefetch optimization. Do not
-attribute all cross-model speed differences to parameter count or quantization.
+The native image processor runs once per record. A private shallow processor copy
+owns a per-record cache; prompt and labeled calls still use native tokenization
+and image-token expansion. Exact prefix/mask checks and input signatures remain.
+The cache is discarded with the record; it is not a huge in-memory dataset cache.
+
+One CPU producer prepares at most two pending microbatches plus the consumer.
+It closes and joins every 75 optimizer steps **before** validation starts, so
+validation never shares its processor with a live producer. No reordering,
+augmentation change, cropping reduction or token truncation is introduced.
+CPU tensor operations use two threads by default (`--cpu-threads` overrides).
+This also prevents high thread counts from competing with the prefetch worker.
+
+Update logs separately report CPU wait, overlapped CPU preprocessing, GPU transfer,
+forward and backward time, optimizer time, total update wall time and peak memory.
+The overlapped times must not be added together as if they were serial. Run-level
+training wall time includes producer startup/shutdown and occupancy guards.
+Do not attribute all cross-model speed differences to parameter count or NF4.
 
 ## Compatibility and execution gates
 
@@ -117,25 +143,81 @@ python -m unittest discover -s scripts/smolvlm -p 'test_*.py' -v
 python scripts/smolvlm/run.py preflight
 
 # On the allocated idle V100, run the GPU gates in separate processes.
-CUDA_VISIBLE_DEVICES=0 python scripts/smolvlm/run.py smoke --mode fp16 --output results/smolvlm/smoke-fp16
-CUDA_VISIBLE_DEVICES=0 python scripts/smolvlm/run.py smoke --mode nf4 --output results/smolvlm/smoke-nf4
+CUDA_VISIBLE_DEVICES=0 python scripts/smolvlm/run.py smoke --mode fp16 --output results/smolvlm-optimized-v1/smoke-fp16
+CUDA_VISIBLE_DEVICES=0 python scripts/smolvlm/run.py smoke --mode nf4 --output results/smolvlm-optimized-v1/smoke-nf4
 
 # Continue only after successful matching gates.
-CUDA_VISIBLE_DEVICES=0 python scripts/smolvlm/run.py train --mode fp16 --output results/smolvlm/fp16-training
-CUDA_VISIBLE_DEVICES=0 python scripts/smolvlm/run.py train --mode nf4 --output results/smolvlm/nf4-training
+CUDA_VISIBLE_DEVICES=0 python scripts/smolvlm/run.py train --mode fp16 --output results/smolvlm-optimized-v1/fp16-training
+CUDA_VISIBLE_DEVICES=0 python scripts/smolvlm/run.py train --mode nf4 --output results/smolvlm-optimized-v1/nf4-training
 
 # Repeat for nf4-base, fp16-lora and nf4-qlora after both trainings finish.
-CUDA_VISIBLE_DEVICES=0 python scripts/smolvlm/run.py evaluate --arm fp16-base --output results/smolvlm/test/fp16-base
+CUDA_VISIBLE_DEVICES=0 python scripts/smolvlm/run.py evaluate --arm fp16-base --output results/smolvlm-optimized-v1/test/fp16-base
 
 # After all four test arms complete, verify paired inputs and compare scores.
 python scripts/smolvlm/summarize.py
 ```
 
 `bash scripts/smolvlm/run_pipeline.sh` runs this entire sequence, stopping at the
-first failure. All outputs are new; existing directories are refused. Run in a
+first failure. The optimized launcher uses **`results/smolvlm-optimized-v1`**,
+to keep original run outputs intact. It includes
+two-update disposable profiles and matching smoke gates before either full
+training. Pass a new output root as its first argument for another fresh run.
+All outputs are new; existing directories are refused. Run in a
 persistent terminal. The launcher expects prepared data to exist and uses the
 current interpreter, so activate `memelens-nf4` first. Interrupted runs retain
 their audit files; this first implementation does not resume training.
+
+### Running the optimized version
+
+After the user copies the local scripts and stops the old job themselves, run on
+the allocated V100 in the existing environment:
+
+```bash
+bash scripts/smolvlm/run_pipeline.sh
+```
+
+That keeps microbatch 2 and disables recomputation. To investigate a larger
+microbatch before committing to a full run, profile training-only records in
+fresh directories (do not run alongside the old job):
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python scripts/smolvlm/run.py profile --mode fp16 \
+  --microbatch 4 --output results/smolvlm-profile-fp16-mb4
+CUDA_VISIBLE_DEVICES=0 python scripts/smolvlm/run.py profile --mode nf4 \
+  --microbatch 4 --output results/smolvlm-profile-nf4-mb4
+```
+
+Profiles write `profile.json`, not a successful training `complete.json` gate.
+They use two updates by default (2–5 configurable), never load test data, and
+do not establish maximum-length memory safety or convergence. No server timing
+or speedup is claimed from local CPU tests. After choosing a common configuration,
+the launcher can use it consistently:
+
+```bash
+SMOLVLM_MICROBATCH=4 bash scripts/smolvlm/run_pipeline.sh results/smolvlm-optimized-mb4
+# Optional memory-saving recomputation, identical in both arms:
+SMOLVLM_CHECKPOINTING=on bash scripts/smolvlm/run_pipeline.sh results/smolvlm-optimized-checkpointed
+```
+
+Changing microbatch can change floating-point rounding and dropout draws; it is
+not a claim of reproducing the old trajectory bit for bit. New code hashes and
+execution settings invalidate the old smoke gates. Restart from the shared
+initialization in new output folders; the current training process will not
+pick up edits and is not resumed under a different recipe.
+
+All 12 optimized tests passed locally in an isolated temporary environment using
+Transformers 4.57.1 / PEFT 0.17.1 and the Mac's PyTorch 2.12.0 CPU build. The real
+pinned processor produced bit-identical tensors, labels, masks and audit hashes
+versus the original two-image-processing path, for both class labels. Tests also
+cover the prefetch engine's order and equal record weighting at microbatches
+2/4/8, producer shutdown before validation, step-300 early stopping in a flat-score
+test, and best-step-75 checkpoint selection. That control-flow test uses simulated
+training/validation; it is not a measured training result. The tiny real Idefics3
+CPU backward/checkpoint test passed with recomputation disabled.
+
+No SSH connection, server synchronization, GPU profiling or GPU training was
+performed while implementing these optimizations. The V100's PyTorch 2.5.1 /
+NF4 path must pass the new profiles and smoke gates before a new full run.
 
 ## Environment evidence from 1 November 2026
 
