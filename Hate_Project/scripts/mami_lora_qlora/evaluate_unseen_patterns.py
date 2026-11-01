@@ -40,8 +40,8 @@ def read_completed(folder, conditions, preparation_sha):
     return done, rows
 
 
-def run(args):
-    conditions, _ = test_data.load(args.data)
+def run(args, *, data_module=test_data, completion_reader=read_completed, runner_path=__file__):
+    conditions, _ = data_module.load(args.data)
     verify_test_training_link(args)
     gates = training_gates(args)
     arm, mode = args.arm, args.arm.split('-')[0]
@@ -51,7 +51,7 @@ def run(args):
     if out.exists():
         if not args.reuse_complete:
             raise FileExistsError(f'Preserve existing output: {out}')
-        done, _ = read_completed(out, conditions, preparation_sha)
+        done, _ = completion_reader(out, conditions, preparation_sha)
         if done['arm'] != arm or done['training_completion_sha256'] != training_hashes:
             raise ValueError('Completed evaluation belongs to different trained runs')
         print(f'Reusing verified completed test arm: {arm}', flush=True)
@@ -108,7 +108,8 @@ def run(args):
         gpu_uuid=str(getattr(torch.cuda.get_device_properties(0), 'uuid', 'unavailable')),
         processor=processor.image_processor.to_dict(), quantized_modules=quantized,
         adapter_hash=gates[mode]['complete']['final_adapter_sha256'] if adapted else None,
-        adapter_merged=False, runner_sha256=common.digest(__file__),
+        adapter_merged=False, runner_sha256=common.digest(runner_path),
+        inference_source_sha256=common.digest(__file__),
         scoring_source_sha256=common.digest(Path(__file__).resolve().parents[1]/'efficiency/compare.py'),
         generation=dict(max_new_tokens=5, do_sample=False, num_beams=1, use_cache=True),
         image_budget=dict(max_pixels=524288, min_pixels=4096), inference_microbatch=1,
@@ -119,7 +120,7 @@ def run(args):
     start = time.perf_counter()
     torch.cuda.reset_peak_memory_stats()
     with (out/'predictions.jsonl').open('x') as stream:
-        for condition in test_data.CONDITIONS:
+        for condition in data_module.CONDITIONS:
             gpu_free()
             saved = []
             for index, row in enumerate(conditions[condition], 1):
@@ -150,14 +151,16 @@ def run(args):
                 saved.append(result)
                 del batch, generated
                 if index % 250 == 0:
-                    print(f'{arm} {condition}: {index}/1000', flush=True)
+                    print(f'{arm} {condition}: {index}/{len(conditions[condition])}', flush=True)
             summary = metrics.quality([r['true_label'] for r in saved], [r['pred_label'] for r in saved])
             summary['strict_format_compliance'] = sum(r['strict_format'] for r in saved)/len(saved)
             summaries[condition] = summary
             print(f"{arm} {condition}: macro-F1={summary['macro_f1']:.4f}", flush=True)
     gpu_free()
     torch.cuda.synchronize()
-    done = dict(arm=arm, n_originals=1000, predictions=2000, validation_used_for_selection=False,
+    done = dict(arm=arm,
+        n_originals=len({r['original_id'] for rows in conditions.values() for r in rows}),
+        predictions=sum(len(rows) for rows in conditions.values()), validation_used_for_selection=False,
         test_preparation_sha256=preparation_sha, training_completion_sha256=training_hashes,
         predictions_sha256=common.digest(out/'predictions.jsonl'), metadata_sha256=common.digest(out/'metadata.json'),
         metrics=summaries, evaluation_wall_seconds=time.perf_counter()-start,
