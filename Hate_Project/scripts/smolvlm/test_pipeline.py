@@ -9,6 +9,46 @@ from run import EarlyStopping, order, execution_settings
 
 
 class ControlTests(unittest.TestCase):
+    def test_recovery_launcher_never_retrains_fp16_or_overwrites_existing_outputs(self):
+        import json
+        import os
+        import subprocess
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            original = root/'original'
+            original.mkdir()
+            sentinel = original/'finished-fp16.txt'
+            sentinel.write_text('keep this result')
+            binary = root/'bin'
+            binary.mkdir()
+            calls = root/'calls.jsonl'
+            fake = binary/'python'
+            fake.write_text('#!/usr/bin/env python3\nimport json, os, sys\n'
+                'with open(os.environ["SMOLVLM_TEST_CALLS"], "a") as f:\n'
+                '    f.write(json.dumps(sys.argv[1:])+"\\n")\n')
+            fake.chmod(0o755)
+            env = dict(os.environ, PATH=str(binary)+os.pathsep+os.environ['PATH'],
+                       SMOLVLM_TEST_CALLS=str(calls))
+            script = str(Path(__file__).with_name('recover_nf4.sh'))
+            retry = root/'recovery'
+            result = subprocess.run(['bash', script, str(original), str(retry)], env=env,
+                                    capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            recorded = [json.loads(line) for line in calls.read_text().splitlines()]
+            training = [args for args in recorded if len(args) > 1 and args[1] == 'train']
+            self.assertEqual(len(training), 1)
+            self.assertEqual(training[0][training[0].index('--mode')+1], 'nf4')
+            self.assertEqual(training[0][training[0].index('--microbatch')+1], '1')
+            evaluations = [args for args in recorded if len(args) > 1 and args[1] == 'evaluate']
+            self.assertEqual(len(evaluations), 4)
+            self.assertTrue(all('--allow-execution-differences' in args for args in evaluations))
+            self.assertEqual(sentinel.read_text(), 'keep this result')
+            previous_calls = calls.read_bytes()
+            result = subprocess.run(['bash', script, str(original), str(retry)], env=env,
+                                    capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(calls.read_bytes(), previous_calls)
+
     def test_validation_windows_and_effective_batch_are_preserved(self):
         from types import SimpleNamespace
         from training_engine import validation_windows
@@ -16,17 +56,86 @@ class ControlTests(unittest.TestCase):
         windows = validation_windows(indices)
         self.assertEqual([len(w) for w in windows], [3600]*5)
         self.assertEqual([i for window in windows for i in window], indices)
-        for microbatch in (2, 4, 8):
+        for microbatch in (1, 2, 4, 8):
             settings = execution_settings(SimpleNamespace(microbatch=microbatch))
             self.assertEqual(settings['microbatch']*settings['accumulation'], 48)
             self.assertFalse(settings['gradient_checkpointing'])
         with self.assertRaises(ValueError):
             execution_settings(SimpleNamespace(microbatch=5))
 
+    def test_recovery_allows_only_explicit_execution_differences(self):
+        from copy import deepcopy
+        from run import control, compare_training_controls
+        fp16 = control({'manifest': 'same'})
+        nf4 = deepcopy(fp16)
+        nf4.update(microbatch=1, accumulation=48)
+        with self.assertRaisesRegex(ValueError, 'allow-execution-differences'):
+            compare_training_controls(fp16, nf4)
+        comparison = compare_training_controls(fp16, nf4, True)
+        self.assertFalse(comparison['strict_execution_match'])
+        self.assertEqual(comparison['execution_differences']['microbatch'], dict(fp16=2, nf4=1))
+        self.assertTrue(compare_training_controls(fp16, deepcopy(fp16))['strict_execution_match'])
+        for key, value in [('learning_rate', 1e-3), ('seed', 123), ('eval_steps', 150),
+                           ('revision', 'different'), ('lora', {}), ('data', {})]:
+            changed = dict(nf4, **{key: value})
+            with self.assertRaisesRegex(ValueError, 'experiment controls differ'):
+                compare_training_controls(fp16, changed, True)
+        with self.assertRaisesRegex(ValueError, 'effective batch'):
+            compare_training_controls(fp16, dict(nf4, accumulation=24), True)
+
+    def test_recovery_verifies_existing_fp16_without_modifying_it(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        import run
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)/'fp16-training'
+            folder = root/'checkpoint-step-525'
+            adapter = folder/'adapter'
+            adapter.mkdir(parents=True)
+            (adapter/'adapter_model.safetensors').write_bytes(b'file-verification-fixture')
+            controls = run.control({'manifest': 'same'})
+            c.save_json(folder/'complete.json', dict(step=525, score=.8412741387829133,
+                controls=controls, adapter_sha256='best', files={
+                    'adapter/adapter_model.safetensors': c.digest(adapter/'adapter_model.safetensors')}))
+            for name in ('request', 'training_plan'):
+                c.save_json(root/f'{name}.json', dict(controls=controls))
+            done = dict(mode='fp16', controls=controls, best_checkpoint=folder.name,
+                optimizer_steps=750, best_step=525, best_score=.8412741387829133,
+                best_adapter_sha256='best', initial_adapter_sha256='init',
+                checkpoint_policy='best_validation_mean_macro_f1', restored_best=True,
+                best_checkpoint_complete_sha256=c.digest(folder/'complete.json'),
+                request_sha256=c.digest(root/'request.json'),
+                training_plan_sha256=c.digest(root/'training_plan.json'))
+            c.save_json(root/'complete.json', done)
+            original = {str(p.relative_to(root)): c.digest(p) for p in root.rglob('*') if p.is_file()}
+            smoke = Path(temp)/'smoke-nf4'
+            smoke.mkdir()
+            c.save_json(smoke/'complete.json', dict(controls=controls))
+            args = SimpleNamespace(fp16_training=str(root), smoke_nf4=str(smoke),
+                smoke_fp16='unused', microbatch=1, allow_execution_differences=True,
+                output=str(Path(temp)/'recovery-check.json'))
+            with patch.object(run, 'verify_gates', return_value='init'), patch.object(c, 'model_load',
+                    side_effect=AssertionError('Recovery verification must not load a GPU')):
+                run.verify_recovery(args)
+            disclosure = c.read_json(args.output)['training_comparison']
+            self.assertEqual(disclosure['execution_settings']['nf4']['accumulation'], 48)
+            self.assertEqual(original, {str(p.relative_to(root)): c.digest(p)
+                                       for p in root.rglob('*') if p.is_file()})
+            args.output = None
+            with patch.object(run, 'verify_gates', return_value='different'):
+                with self.assertRaisesRegex(ValueError, 'initialization differs'):
+                    run.verify_recovery(args)
+            with (adapter/'adapter_model.safetensors').open('ab') as stream:
+                stream.write(b'changed')
+            with self.assertRaisesRegex(ValueError, 'Checkpoint changed'):
+                run.training_gate(root, 'fp16')
+
     def test_summary_rejects_unpaired_inputs_and_changed_metrics(self):
         import json
         from summarize import ARMS, summarize
         scoring = c.metrics()
+        disclosure = dict(strict_execution_match=False,
+            execution_differences={'microbatch': dict(fp16=2, nf4=1)})
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             rows = [dict(original_id=str(i), true_label=i % 2, pred_label=i % 2,
@@ -40,9 +149,19 @@ class ControlTests(unittest.TestCase):
                     (folder/f'{condition}.jsonl').write_text(''.join(json.dumps(r)+'\n' for r in rows))
                 c.save_json(folder/'complete.json', dict(arm=arm, model=c.MODEL, revision=c.REVISION,
                     versions={}, test_preparation_sha256='same', training_completion_sha256={},
+                    training_comparison=disclosure,
                     best_step=75 if not arm.endswith('base') else None,
                     summary={k: quality for k in c.CONDITIONS}))
             self.assertEqual(summarize(root)['conditions']['clean_image_only']['macro_f1_deltas']['qlora_minus_lora'], 0)
+            self.assertEqual(summarize(root)['training_comparison'], disclosure)
+            complete_path = root/ARMS[-1]/'complete.json'
+            completion = c.read_json(complete_path)
+            completion['training_comparison'] = None
+            complete_path.write_text(json.dumps(completion))
+            with self.assertRaisesRegex(ValueError, 'disclosure differs'):
+                summarize(root)
+            completion['training_comparison'] = disclosure
+            complete_path.write_text(json.dumps(completion))
             path = root/ARMS[-1]/'clean_image_only.jsonl'
             changed = [dict(r) for r in rows]
             changed[0]['input_signature'] = 'different'
@@ -223,7 +342,7 @@ class ArchitectureTests(unittest.TestCase):
             return norm
 
         weights = []
-        for microbatch in (2, 4, 8):
+        for microbatch in (1, 2, 4, 8):
             model = torch.nn.Linear(1, 1, bias=False)
             with torch.no_grad():
                 model.weight.fill_(.3)

@@ -18,6 +18,8 @@ def summarize(root):
         for key in ('model', 'revision', 'versions', 'test_preparation_sha256', 'training_completion_sha256'):
             if done[key] != reference[key]:
                 raise ValueError(f'Evaluation controls differ: {key}')
+        if done.get('training_comparison') != reference.get('training_comparison'):
+            raise ValueError('Evaluation training comparison disclosure differs')
     tables = {}
     for condition in c.CONDITIONS:
         paired = None
@@ -43,6 +45,7 @@ def summarize(root):
             'lora_minus_fp16_base': values['fp16-lora']['macro_f1']-values['fp16-base']['macro_f1'],
             'qlora_minus_nf4_base': values['nf4-qlora']['macro_f1']-values['nf4-base']['macro_f1']})
     return dict(model=reference['model'], revision=reference['revision'], conditions=tables,
+        training_comparison=reference.get('training_comparison'),
         selected_steps={a: results[a]['best_step'] for a in ARMS},
         evaluation_timing_scope='Full per-condition loop including preprocessing, transfer and logging; excludes model loading',
         qualification='Different early-stopping steps are allowed. These are descriptive paired results, without significance claims.')

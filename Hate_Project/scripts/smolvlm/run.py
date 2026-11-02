@@ -50,8 +50,8 @@ def order(count, epoch):
 
 def execution_settings(args=None):
     microbatch = getattr(args, 'microbatch', MICROBATCH)
-    if microbatch not in (2, 4, 8) or BATCH % microbatch:
-        raise ValueError('Microbatch must be 2, 4 or 8 and divide effective batch 48')
+    if microbatch not in (1, 2, 4, 8) or BATCH % microbatch:
+        raise ValueError('Microbatch must be 1, 2, 4 or 8 and divide effective batch 48')
     return dict(microbatch=microbatch, accumulation=BATCH//microbatch,
         gradient_checkpointing=getattr(args, 'gradient_checkpointing', False),
         cpu_threads=getattr(args, 'cpu_threads', 2), prefetch_depth=2,
@@ -395,6 +395,7 @@ def training_gate(root, mode):
             or done['checkpoint_policy'] != 'best_validation_mean_macro_f1' or not done['restored_best']
             or marker['step'] != done['best_step'] or marker['score'] != done['best_score']
             or marker['adapter_sha256'] != done['best_adapter_sha256']
+            or marker['controls'] != done['controls']
             or c.digest(marker_path) != done['best_checkpoint_complete_sha256']):
         raise ValueError('Expected completed best-validation SmolVLM training in the same environment')
     for name in ('request', 'training_plan'):
@@ -406,14 +407,71 @@ def training_gate(root, mode):
     return root, done
 
 
+EXECUTION_KEYS = ('microbatch', 'accumulation', 'gradient_checkpointing', 'cpu_threads')
+
+
+def compare_training_controls(fp16, nf4, allow_execution_differences=False):
+    """Permit explicit memory-policy differences, never different scientific inputs."""
+    for controls in (fp16, nf4):
+        if (controls.get('effective_batch') != BATCH or
+                controls.get('microbatch') not in (1, 2, 4, 8) or
+                controls['microbatch'] * controls.get('accumulation', 0) != BATCH):
+            raise ValueError('Each arm must use a complete effective batch of 48')
+    shared = [{k: v for k, v in controls.items() if k not in EXECUTION_KEYS}
+              for controls in (fp16, nf4)]
+    if shared[0] != shared[1]:
+        different = sorted(k for k in set(shared[0]) | set(shared[1])
+                           if shared[0].get(k) != shared[1].get(k))
+        raise ValueError(f'Training experiment controls differ: {different}')
+    differences = {k: dict(fp16=fp16.get(k), nf4=nf4.get(k)) for k in EXECUTION_KEYS
+                   if fp16.get(k) != nf4.get(k)}
+    if differences and not allow_execution_differences:
+        raise ValueError('Training execution settings differ; explicitly pass '
+                         '--allow-execution-differences for the documented recovery comparison')
+    return dict(strict_execution_match=not differences, execution_differences=differences,
+        execution_settings={mode: {k: controls.get(k) for k in EXECUTION_KEYS}
+                            for mode, controls in (('fp16', fp16), ('nf4', nf4))},
+        qualification=('Identical execution settings.' if not differences else
+            'Effective batch and experiment controls match; memory execution settings differ. '
+            'Rounding and dropout draws may differ; runtime differences cannot be attributed solely to quantization.'))
+
+
+def verify_training(args):
+    mode = args.mode
+    root, done = training_gate(getattr(args, mode+'_training'), mode)
+    print(json.dumps(dict(mode=mode, training_root=str(root),
+        optimizer_steps=done['optimizer_steps'], best_step=done['best_step'],
+        best_score=done['best_score'], best_checkpoint=done['best_checkpoint'],
+        restored_best=done['restored_best'], execution_settings={
+            k: done['controls'].get(k) for k in EXECUTION_KEYS}), indent=2))
+
+
+def verify_recovery(args):
+    root, done = training_gate(args.fp16_training, 'fp16')
+    smoke = c.read_json(Path(args.smoke_nf4)/'complete.json')
+    controls = control(smoke['controls']['data'], args)
+    initial_hash = verify_gates(args, controls)
+    if initial_hash != done['initial_adapter_sha256']:
+        raise ValueError('Recovery initialization differs from the completed FP16 run')
+    comparison = compare_training_controls(done['controls'], controls,
+        getattr(args, 'allow_execution_differences', False))
+    result = dict(fp16_training_root=str(root), fp16_best_step=done['best_step'],
+        fp16_completion_sha256=c.digest(root/'complete.json'), training_comparison=comparison,
+        initial_adapter_sha256=initial_hash)
+    if args.output:
+        c.save_json(args.output, result)
+    print(json.dumps(result, indent=2))
+
+
 def evaluate_test(args):
     from peft import PeftModel
     mode = args.arm.split('-')[0]
     gates = {m: training_gate(folder, m) for m, folder in
         (('fp16', args.fp16_training), ('nf4', args.nf4_training))}
-    if gates['fp16'][1]['controls'] != gates['nf4'][1]['controls'] or gates['fp16'][1][
-            'initial_adapter_sha256'] != gates['nf4'][1]['initial_adapter_sha256']:
-        raise ValueError('Training arms have different controls or initialization')
+    comparison = compare_training_controls(gates['fp16'][1]['controls'], gates['nf4'][1]['controls'],
+        getattr(args, 'allow_execution_differences', False))
+    if gates['fp16'][1]['initial_adapter_sha256'] != gates['nf4'][1]['initial_adapter_sha256']:
+        raise ValueError('Training arms have different adapter initialization')
     test = c.legacy('prepare_test_conditions')
     conditions, _ = test.load(args.test_data)
     test_manifest = c.read_json(Path(args.test_data)/'manifest.json')
@@ -438,6 +496,7 @@ def evaluate_test(args):
     summary = c.evaluate(model, processor, conditions, out)
     c.save_json(out/'complete.json', dict(arm=args.arm, model=c.MODEL, revision=c.REVISION,
         versions=c.versions(), quantized_modules=quantized, summary=summary,
+        training_comparison=comparison,
         best_step=trained['best_step'] if not args.arm.endswith('-base') else None,
         test_preparation_sha256=c.digest(Path(args.test_data)/'complete.json'),
         training_completion_sha256={m: c.digest(r/'complete.json') for m, (r, _) in gates.items()}))
@@ -445,7 +504,8 @@ def evaluate_test(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command', choices=['check', 'cache', 'preflight', 'smoke', 'profile', 'train', 'evaluate'])
+    parser.add_argument('command', choices=['check', 'cache', 'preflight', 'smoke', 'profile',
+                                          'train', 'verify-training', 'verify-recovery', 'evaluate'])
     parser.add_argument('--mode', choices=['fp16', 'nf4'])
     parser.add_argument('--output')
     parser.add_argument('--data', default='data/processed/mami_lora_qlora_seed42')
@@ -456,7 +516,9 @@ def main():
     parser.add_argument('--nf4-training', default=f'{c.RESULTS_ROOT}/nf4-training')
     parser.add_argument('--test-data', default='data/processed/mami_lora_qlora_test_seed42')
     parser.add_argument('--arm', choices=['fp16-base', 'nf4-base', 'fp16-lora', 'nf4-qlora'])
-    parser.add_argument('--microbatch', type=int, choices=[2, 4, 8], default=2)
+    parser.add_argument('--microbatch', type=int, choices=[1, 2, 4, 8], default=2)
+    parser.add_argument('--allow-execution-differences', action='store_true',
+        help='Permit and record microbatch/checkpointing differences; still require matched experiment controls')
     parser.add_argument('--gradient-checkpointing', action='store_true',
                         help='Enable activation recomputation to trade speed for memory')
     parser.add_argument('--cpu-threads', type=int, default=2)
@@ -464,7 +526,7 @@ def main():
     args = parser.parse_args()
     if args.command in ('smoke', 'profile', 'train', 'evaluate') and not args.output:
         parser.error('--output is required')
-    if args.command in ('smoke', 'profile', 'train') and not args.mode:
+    if args.command in ('smoke', 'profile', 'train', 'verify-training') and not args.mode:
         parser.error('--mode is required')
     if args.command == 'evaluate' and not args.arm:
         parser.error('--arm is required')
@@ -478,7 +540,9 @@ def main():
             import torch
             torch.set_num_threads(args.cpu_threads)
         dict(check=check, cache=cache, preflight=preflight, smoke=smoke,
-             profile=profile, train=train, evaluate=evaluate_test)[args.command](args)
+             profile=profile, train=train,
+             **{'verify-training': verify_training, 'verify-recovery': verify_recovery},
+             evaluate=evaluate_test)[args.command](args)
     except BaseException as error:
         if out and out.is_dir() and (out/'request.json').exists():
             c.save_json(out/'failure.json', dict(type=type(error).__name__, message=str(error)))

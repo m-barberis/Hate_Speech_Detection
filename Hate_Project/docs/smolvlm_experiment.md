@@ -62,7 +62,7 @@ no test metric selects the recipe or a checkpoint.
 
 Training: seed 42, microbatch 2, accumulation 24, effective batch 48,
 375 updates per epoch, at most 1125 updates. Microbatch remains 2 by default;
-explicit `--microbatch 4` or `--microbatch 8` derives accumulation 12 or 6,
+explicit `--microbatch 1`, `--microbatch 4` or `--microbatch 8` derives accumulation 48, 12 or 6,
 respectively, preserving the same 48 ordered records and equal per-record loss
 weight in every update. These larger settings require new FP16/NF4 smoke gates.
 LoRA rank 16, alpha 32, dropout
@@ -219,6 +219,72 @@ No SSH connection, server synchronization, GPU profiling or GPU training was
 performed while implementing these optimizations. The V100's PyTorch 2.5.1 /
 NF4 path must pass the new profiles and smoke gates before a new full run.
 
+## NF4-only recovery after OOM, approved 2 November 2026
+
+The user reported completed FP16 training at step 750, with best checkpoint at
+step 525, validation score 0.8412741387829133 and `restored_best: true`. NF4 then
+ran out of memory near its second update. The user approved restarting only NF4
+with microbatch 1 / accumulation 48 while preserving the completed FP16 run.
+There is no optimizer-state resume; the failed NF4 arm restarts from its pinned
+base and shared adapter initialization. No server access is authorized without
+asking the user first.
+
+After copying the updated `scripts/smolvlm/` directory, run manually from the
+server project directory in `memelens-nf4`, with GPU 0 allocated and idle:
+
+```bash
+bash scripts/smolvlm/recover_nf4.sh
+```
+
+The original root defaults to `results/smolvlm-optimized-v1`. The script first
+verifies the completed FP16 checkpoint metadata and every saved checkpoint file
+hash, without loading a GPU model or changing the existing training files. Then
+it creates a **new** directory:
+
+`results/smolvlm-optimized-v1/nf4-recovery-mb1-v1/`
+
+Recovery runs a two-update NF4 profile and tiny fresh smoke checks in both
+formats at microbatch 1, validates that their shared initialization and experiment
+controls match the finished FP16 run, and trains **NF4 only**. The small FP16
+smoke check is not another full FP16 training run. Images, prompts, effective
+batch 48, learning rate, data order, three-epoch maximum, validation every 75
+updates, stopping patience 3, and best-checkpoint selection are unchanged.
+
+After NF4 finishes, the script evaluates all four arms, loading the completed
+original FP16 adapter and the recovered NF4 adapter. Evaluation explicitly uses
+`--allow-execution-differences`. Only microbatch, accumulation, checkpointing and
+CPU thread settings may differ under this flag. All model/data/seed/LoRA/
+learning-rate/validation controls must still match, and initialization hashes
+must be equal. The full execution comparison and its caveat are written to each
+test completion file and the combined summary. Microbatch-dependent rounding
+and dropout draws can differ; runtime differences are not attributable solely
+to quantization.
+
+The final summary is:
+
+`results/smolvlm-optimized-v1/nf4-recovery-mb1-v1/test/summary.json`
+
+Existing recovery directories are refused rather than overwritten. If needed,
+pass an alternative original root and fresh recovery directory explicitly:
+
+```bash
+bash scripts/smolvlm/recover_nf4.sh \
+  results/smolvlm-optimized-v1 results/smolvlm-nf4-recovery-mb1-v2
+```
+
+Do not launch the original full pipeline again. Do not delete the finished FP16
+directory or the failed NF4 audit files. Stop and inspect another OOM rather
+than automatically changing image resolution, checkpointing or batch settings.
+
+All 15 local tests pass, including microbatch-1 record weighting, rejection of
+different scientific controls, explicit execution-difference disclosure,
+read-only verification of a fixture representing the completed step-525 FP16
+checkpoint, initialization mismatch rejection and checkpoint tamper detection.
+The launcher test uses a local stub interpreter to verify it schedules only NF4
+full training, schedules all four evaluations, preserves the original result
+and refuses to overwrite a recovery directory; it does not start model jobs.
+These are local CPU tests; no GPU recovery run or server connection was made.
+
 ## Environment evidence from 1 November 2026
 
 The local desktop is macOS arm64 with Python 3.14 / PyTorch 2.12.0, no CUDA,
@@ -258,7 +324,7 @@ and valid masked label suffixes in the four selected real training records.
 These records produced 13 or 17 crops, so the pending GPU checks exercise the
 native multi-crop path rather than a single reduced image.
 
-**Still pending:** real-checkpoint FP16 and NF4 GPU optimizer/generation gates,
+**Pending at that earlier inspection:** real-checkpoint FP16 and NF4 GPU optimizer/generation gates,
 then full training and test evaluation. The occupied V100 was not interrupted.
 No claim of QLoRA GPU compatibility or successful full training follows from
 the CPU evidence. Local copies of compatibility reports are saved under

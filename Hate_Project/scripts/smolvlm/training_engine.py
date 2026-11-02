@@ -22,8 +22,8 @@ def updates(model, processor, records, indices, trainable, optimizer, scaler,
     """
     import torch
     effective_batch = 48
-    if microbatch not in (2, 4, 8) or len(indices) % effective_batch:
-        raise ValueError('Expected complete 48-record groups and microbatch 2/4/8')
+    if microbatch not in (1, 2, 4, 8) or len(indices) % effective_batch:
+        raise ValueError('Expected complete 48-record groups and microbatch 1/2/4/8')
     batching = c.legacy('training_batches')
     accumulation = effective_batch // microbatch
 
