@@ -1,0 +1,86 @@
+{
+  "clean_image_only": {
+    "n": 1000,
+    "macro_f1": 0.6319374098165225,
+    "accuracy": 0.661,
+    "invalid_count": 0,
+    "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+      [
+        190,
+        310,
+        0
+      ],
+      [
+        29,
+        471,
+        0
+      ]
+    ],
+    "strict_format_compliance": 1.0,
+    "wall_seconds": 1325.954652696848,
+    "peak_allocated_bytes": 1189352448
+  },
+  "overlay_image_only": {
+    "n": 1000,
+    "macro_f1": 0.631104270286085,
+    "accuracy": 0.652,
+    "invalid_count": 0,
+    "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+      [
+        207,
+        293,
+        0
+      ],
+      [
+        55,
+        445,
+        0
+      ]
+    ],
+    "strict_format_compliance": 1.0,
+    "wall_seconds": 1302.0826941449195,
+    "peak_allocated_bytes": 1189352448
+  },
+  "clean_with_transcription": {
+    "n": 1000,
+    "macro_f1": 0.6605817649962364,
+    "accuracy": 0.683,
+    "invalid_count": 0,
+    "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+      [
+        213,
+        287,
+        0
+      ],
+      [
+        30,
+        470,
+        0
+      ]
+    ],
+    "strict_format_compliance": 1.0,
+    "wall_seconds": 1315.1028607878834,
+    "peak_allocated_bytes": 1189342208
+  },
+  "overlay_with_transcription": {
+    "n": 1000,
+    "macro_f1": 0.6639103084415585,
+    "accuracy": 0.682,
+    "invalid_count": 0,
+    "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+      [
+        225,
+        275,
+        0
+      ],
+      [
+        43,
+        457,
+        0
+      ]
+    ],
+    "strict_format_compliance": 1.0,
+    "wall_seconds": 1308.0066053718328,
+    "peak_allocated_bytes": 1189342208
+  }
+}

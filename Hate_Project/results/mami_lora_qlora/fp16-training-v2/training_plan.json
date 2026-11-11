@@ -1,0 +1,53 @@
+{
+  "mode": "fp16",
+  "original_training_images": 9000,
+  "training_records": 18000,
+  "epochs": 2,
+  "microbatch": 2,
+  "gradient_accumulation": 24,
+  "effective_global_batch": 48,
+  "updates_per_epoch": [
+    375,
+    375
+  ],
+  "optimizer_updates": 750,
+  "validation_counts": {
+    "clean_image_only": 1000,
+    "overlay_image_only": 1000,
+    "clean_with_transcription": 1000,
+    "overlay_with_transcription": 1000
+  },
+  "training_order_sha256": [
+    "a8f8d168c1faefe17a649ae834be520f93f700464230027955e0c79600a36606",
+    "bbba9de006e2e38086f8a835c753c2511f3ed0be5a426e2348d7ea84e92aaf95"
+  ],
+  "initial_adapter_sha256": "23031894c7d1f7e624ffa6791a3fab47b8f96dc38ab2910442460cd8850d6e79",
+  "unique_verified_image_files": 20000,
+  "prepared_complete_sha256": "6a98f9aed939df8a720f6e924c744f42cadf49911ceb80b95100f28df10bb86a",
+  "validation_complete_sha256": "35bbbd527b80c13b70749ee39ffe3888814caa42b2253a0ae7ee05d4d1285f31",
+  "final_checkpoint_policy": "epoch_2_without_validation_selection",
+  "training_logits": "full_sequence",
+  "cpu_prefetch_microbatches": 2,
+  "preprocessing_policy": "one CPU producer; at most two pending pairs plus consumer; no dataset cache",
+  "validation_max_new_tokens": 5,
+  "lr_schedule": "linear_decay_without_warmup",
+  "learning_rate": 0.0002,
+  "optimizer": "torch.AdamW",
+  "weight_decay": 0.0,
+  "adam_betas": [
+    0.9,
+    0.999
+  ],
+  "adam_epsilon": 1e-08,
+  "max_gradient_norm": 1.0,
+  "training_loss_weighting": "equal weight per record across each 48-record accumulation group",
+  "runner_sha256": "83f01a47373af936ea09ff331aabd746cfe3b263d6d17b4617fa4502903c447c",
+  "shared_runner_sha256": "8aba5c744a1624d8a89aa2ce6a90a522ef0af27ff7c708fdc10fd38e04947c8c",
+  "batching_source_sha256": "4c103230d82a576e717b8630da37b3e7e54dc31907157c7213a1b6c0d03510ec",
+  "validation_preparer_sha256": "236d92ef5417d0300b367159f2fc0e6411ec690d1fdec4c0239caf8ce325a2de",
+  "scoring_source_sha256": "ee5bb6b1c51d1e2c77ed96061989336e9399c832470a969ae39236359f3cd852",
+  "smoke_completion_sha256": {
+    "fp16": "a94be9148b9281d0b648728236a912ea5e0eff05b38f0494b262a09216cfdc1c",
+    "nf4": "81556ed2bf25a22444b01bb0d2c453d9cabacb66beed1df68cf47d987600843c"
+  }
+}

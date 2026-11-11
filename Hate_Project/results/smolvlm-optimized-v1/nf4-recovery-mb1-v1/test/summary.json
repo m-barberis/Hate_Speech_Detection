@@ -1,0 +1,418 @@
+{
+  "model": "HuggingFaceTB/SmolVLM-256M-Instruct",
+  "revision": "7e3e67edbbed1bf9888184d9df282b700a323964",
+  "conditions": {
+    "clean_image_only": {
+      "arms": {
+        "fp16-base": {
+          "n": 1000,
+          "macro_f1": 0.5720324101946619,
+          "accuracy": 0.564,
+          "invalid_count": 38,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              242,
+              234,
+              24
+            ],
+            [
+              164,
+              322,
+              14
+            ]
+          ],
+          "strict_format_compliance": 0.0,
+          "wall_seconds": 941.2409233413637,
+          "peak_allocated_bytes": 1062946304
+        },
+        "nf4-base": {
+          "n": 1000,
+          "macro_f1": 0.3983306817919808,
+          "accuracy": 0.48,
+          "invalid_count": 108,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              38,
+              401,
+              61
+            ],
+            [
+              11,
+              442,
+              47
+            ]
+          ],
+          "strict_format_compliance": 0.0,
+          "wall_seconds": 1074.0387153811753,
+          "peak_allocated_bytes": 1046410240
+        },
+        "fp16-lora": {
+          "n": 1000,
+          "macro_f1": 0.6535568700967774,
+          "accuracy": 0.679,
+          "invalid_count": 0,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              204,
+              296,
+              0
+            ],
+            [
+              25,
+              475,
+              0
+            ]
+          ],
+          "strict_format_compliance": 1.0,
+          "wall_seconds": 1209.178149446845,
+          "peak_allocated_bytes": 1341310464
+        },
+        "nf4-qlora": {
+          "n": 1000,
+          "macro_f1": 0.6319374098165225,
+          "accuracy": 0.661,
+          "invalid_count": 0,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              190,
+              310,
+              0
+            ],
+            [
+              29,
+              471,
+              0
+            ]
+          ],
+          "strict_format_compliance": 1.0,
+          "wall_seconds": 1325.954652696848,
+          "peak_allocated_bytes": 1189352448
+        }
+      },
+      "macro_f1_deltas": {
+        "nf4_minus_fp16_base": -0.1737017284026811,
+        "qlora_minus_lora": -0.021619460280254965,
+        "lora_minus_fp16_base": 0.08152445990211554,
+        "qlora_minus_nf4_base": 0.2336067280245417
+      }
+    },
+    "overlay_image_only": {
+      "arms": {
+        "fp16-base": {
+          "n": 1000,
+          "macro_f1": 0.48921433361667954,
+          "accuracy": 0.501,
+          "invalid_count": 29,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              346,
+              144,
+              10
+            ],
+            [
+              326,
+              155,
+              19
+            ]
+          ],
+          "strict_format_compliance": 0.0,
+          "wall_seconds": 911.7855130955577,
+          "peak_allocated_bytes": 1061897728
+        },
+        "nf4-base": {
+          "n": 1000,
+          "macro_f1": 0.3782869612656847,
+          "accuracy": 0.41,
+          "invalid_count": 193,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              48,
+              360,
+              92
+            ],
+            [
+              37,
+              362,
+              101
+            ]
+          ],
+          "strict_format_compliance": 0.0,
+          "wall_seconds": 1079.0338715929538,
+          "peak_allocated_bytes": 1046410240
+        },
+        "fp16-lora": {
+          "n": 1000,
+          "macro_f1": 0.6007224189439163,
+          "accuracy": 0.635,
+          "invalid_count": 0,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              171,
+              329,
+              0
+            ],
+            [
+              36,
+              464,
+              0
+            ]
+          ],
+          "strict_format_compliance": 1.0,
+          "wall_seconds": 1209.9432468377054,
+          "peak_allocated_bytes": 1340261888
+        },
+        "nf4-qlora": {
+          "n": 1000,
+          "macro_f1": 0.631104270286085,
+          "accuracy": 0.652,
+          "invalid_count": 0,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              207,
+              293,
+              0
+            ],
+            [
+              55,
+              445,
+              0
+            ]
+          ],
+          "strict_format_compliance": 1.0,
+          "wall_seconds": 1302.0826941449195,
+          "peak_allocated_bytes": 1189352448
+        }
+      },
+      "macro_f1_deltas": {
+        "nf4_minus_fp16_base": -0.11092737235099487,
+        "qlora_minus_lora": 0.030381851342168642,
+        "lora_minus_fp16_base": 0.11150808532723677,
+        "qlora_minus_nf4_base": 0.2528173090204003
+      }
+    },
+    "clean_with_transcription": {
+      "arms": {
+        "fp16-base": {
+          "n": 1000,
+          "macro_f1": 0.5578235369664797,
+          "accuracy": 0.54,
+          "invalid_count": 66,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              252,
+              206,
+              42
+            ],
+            [
+              188,
+              288,
+              24
+            ]
+          ],
+          "strict_format_compliance": 0.0,
+          "wall_seconds": 944.5426877811551,
+          "peak_allocated_bytes": 1062012416
+        },
+        "nf4-base": {
+          "n": 1000,
+          "macro_f1": 0.3860159908082135,
+          "accuracy": 0.476,
+          "invalid_count": 123,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              28,
+              395,
+              77
+            ],
+            [
+              6,
+              448,
+              46
+            ]
+          ],
+          "strict_format_compliance": 0.0,
+          "wall_seconds": 1085.7315952405334,
+          "peak_allocated_bytes": 1046524928
+        },
+        "fp16-lora": {
+          "n": 1000,
+          "macro_f1": 0.658062489883902,
+          "accuracy": 0.681,
+          "invalid_count": 0,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              211,
+              289,
+              0
+            ],
+            [
+              30,
+              470,
+              0
+            ]
+          ],
+          "strict_format_compliance": 1.0,
+          "wall_seconds": 1198.4514488112181,
+          "peak_allocated_bytes": 1340251648
+        },
+        "nf4-qlora": {
+          "n": 1000,
+          "macro_f1": 0.6605817649962364,
+          "accuracy": 0.683,
+          "invalid_count": 0,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              213,
+              287,
+              0
+            ],
+            [
+              30,
+              470,
+              0
+            ]
+          ],
+          "strict_format_compliance": 1.0,
+          "wall_seconds": 1315.1028607878834,
+          "peak_allocated_bytes": 1189342208
+        }
+      },
+      "macro_f1_deltas": {
+        "nf4_minus_fp16_base": -0.17180754615826616,
+        "qlora_minus_lora": 0.002519275112334407,
+        "lora_minus_fp16_base": 0.10023895291742235,
+        "qlora_minus_nf4_base": 0.2745657741880229
+      }
+    },
+    "overlay_with_transcription": {
+      "arms": {
+        "fp16-base": {
+          "n": 1000,
+          "macro_f1": 0.5106687528477232,
+          "accuracy": 0.519,
+          "invalid_count": 34,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              352,
+              127,
+              21
+            ],
+            [
+              320,
+              167,
+              13
+            ]
+          ],
+          "strict_format_compliance": 0.0,
+          "wall_seconds": 913.55913021788,
+          "peak_allocated_bytes": 1062012416
+        },
+        "nf4-base": {
+          "n": 1000,
+          "macro_f1": 0.4015832059123343,
+          "accuracy": 0.463,
+          "invalid_count": 116,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              49,
+              394,
+              57
+            ],
+            [
+              27,
+              414,
+              59
+            ]
+          ],
+          "strict_format_compliance": 0.0,
+          "wall_seconds": 1083.7568190973252,
+          "peak_allocated_bytes": 1046524928
+        },
+        "fp16-lora": {
+          "n": 1000,
+          "macro_f1": 0.6285161379501002,
+          "accuracy": 0.656,
+          "invalid_count": 0,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              192,
+              308,
+              0
+            ],
+            [
+              36,
+              464,
+              0
+            ]
+          ],
+          "strict_format_compliance": 1.0,
+          "wall_seconds": 1210.9047893546522,
+          "peak_allocated_bytes": 1340251648
+        },
+        "nf4-qlora": {
+          "n": 1000,
+          "macro_f1": 0.6639103084415585,
+          "accuracy": 0.682,
+          "invalid_count": 0,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              225,
+              275,
+              0
+            ],
+            [
+              43,
+              457,
+              0
+            ]
+          ],
+          "strict_format_compliance": 1.0,
+          "wall_seconds": 1308.0066053718328,
+          "peak_allocated_bytes": 1189342208
+        }
+      },
+      "macro_f1_deltas": {
+        "nf4_minus_fp16_base": -0.10908554693538886,
+        "qlora_minus_lora": 0.03539417049145832,
+        "lora_minus_fp16_base": 0.11784738510237702,
+        "qlora_minus_nf4_base": 0.2623271025292242
+      }
+    }
+  },
+  "training_comparison": {
+    "strict_execution_match": false,
+    "execution_differences": {
+      "microbatch": {
+        "fp16": 2,
+        "nf4": 1
+      },
+      "accumulation": {
+        "fp16": 24,
+        "nf4": 48
+      }
+    },
+    "execution_settings": {
+      "fp16": {
+        "microbatch": 2,
+        "accumulation": 24,
+        "gradient_checkpointing": false,
+        "cpu_threads": 2
+      },
+      "nf4": {
+        "microbatch": 1,
+        "accumulation": 48,
+        "gradient_checkpointing": false,
+        "cpu_threads": 2
+      }
+    },
+    "qualification": "Effective batch and experiment controls match; memory execution settings differ. Rounding and dropout draws may differ; runtime differences cannot be attributed solely to quantization."
+  },
+  "selected_steps": {
+    "fp16-base": null,
+    "nf4-base": null,
+    "fp16-lora": 525,
+    "nf4-qlora": 600
+  },
+  "evaluation_timing_scope": "Full per-condition loop including preprocessing, transfer and logging; excludes model loading",
+  "qualification": "Different early-stopping steps are allowed. These are descriptive paired results, without significance claims."
+}

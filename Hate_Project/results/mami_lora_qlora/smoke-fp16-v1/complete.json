@@ -1,0 +1,14 @@
+{
+  "mode": "fp16",
+  "microbatches": 4,
+  "optimizer_steps": 1,
+  "gradient_norm": 28.899150848388672,
+  "gradient_parameter_count": 508,
+  "trainable_without_gradient": [],
+  "initial_adapter_sha256": "5867d530d19ff37c797409ca8f68c3241dd4ce70992a1d657e2e46dc45ab6a0d",
+  "updated_adapter_sha256": "bccceed6788c152d45154b923543ceb2207567903fc95e0b31c4746ccee6c144",
+  "peak_allocated_bytes": 19237097984,
+  "peak_reserved_bytes": 21307064320,
+  "qualification": "Four training records only; not full-run memory or speed evidence",
+  "adapter_saved": false
+}

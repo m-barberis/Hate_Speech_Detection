@@ -1,0 +1,57 @@
+{
+  "arm": "nf4-qlora",
+  "n_originals": 1000,
+  "predictions": 2000,
+  "validation_used_for_selection": false,
+  "test_preparation_sha256": "fb3313797f3ff6503840c15133a97ea214d60d53f341d4a41dcd3bfa72a56686",
+  "training_completion_sha256": {
+    "fp16": "1308fae78b11fb1b92a25b7b8b53d2d5445bb82f69ccea8727035ecc5c00444e",
+    "nf4": "f94a9fb9547bc2fde39c0932c00d13829ca70075b891937b4bec190a2ebc7089"
+  },
+  "predictions_sha256": "b6d19d8006154714685c05ef48af5b2122cf6c062e55731e8154ab4667f5e8a5",
+  "metadata_sha256": "0406f30a29dcf5903d88e6bb2efc2fe5040f11d3ce38722aecbc791c58ce1c42",
+  "metrics": {
+    "overlay_image_only": {
+      "n": 1000,
+      "macro_f1": 0.7933444703357695,
+      "accuracy": 0.797,
+      "invalid_count": 0,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          332,
+          168,
+          0
+        ],
+        [
+          35,
+          465,
+          0
+        ]
+      ],
+      "strict_format_compliance": 1.0
+    },
+    "overlay_with_transcription": {
+      "n": 1000,
+      "macro_f1": 0.7935647103448487,
+      "accuracy": 0.797,
+      "invalid_count": 0,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          334,
+          166,
+          0
+        ],
+        [
+          37,
+          463,
+          0
+        ]
+      ],
+      "strict_format_compliance": 1.0
+    }
+  },
+  "evaluation_wall_seconds": 1637.0814854577184,
+  "peak_inference_allocated_bytes": 7256270336,
+  "peak_inference_reserved_bytes": 8636071936,
+  "qualification": "One quality pass; wall time is not a controlled repeated latency benchmark; adapters unmerged"
+}

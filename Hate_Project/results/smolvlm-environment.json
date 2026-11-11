@@ -1,0 +1,106 @@
+{
+  "platform": "Linux-3.10.0-1160.99.1.el7.x86_64-x86_64-with-glibc2.17",
+  "versions": {
+    "torch": "2.5.1",
+    "transformers": "4.57.1",
+    "peft": "0.17.1",
+    "accelerate": "1.10.1",
+    "bitsandbytes": "0.42.0",
+    "numpy": "1.26.4",
+    "Pillow": "11.3.0",
+    "huggingface-hub": "0.36.2",
+    "pandas": "2.3.2"
+  },
+  "model": "HuggingFaceTB/SmolVLM-256M-Instruct",
+  "revision": "7e3e67edbbed1bf9888184d9df282b700a323964",
+  "cuda_training_ready": true,
+  "model_class_import": true,
+  "cuda_available": true,
+  "cuda_build": "11.8",
+  "cuda_arches": [
+    "sm_50",
+    "sm_60",
+    "sm_61",
+    "sm_70",
+    "sm_75",
+    "sm_80",
+    "sm_86",
+    "sm_37",
+    "sm_90",
+    "compute_37"
+  ],
+  "processor": "Idefics3Processor",
+  "image_processor": {
+    "_processor_class": "Idefics3Processor",
+    "image_processor_type": "Idefics3ImageProcessor",
+    "do_convert_rgb": true,
+    "do_resize": true,
+    "size": {
+      "longest_edge": 2048
+    },
+    "resample": 1,
+    "do_image_splitting": true,
+    "max_image_size": {
+      "longest_edge": 512
+    },
+    "do_rescale": true,
+    "rescale_factor": 0.00392156862745098,
+    "do_normalize": true,
+    "image_mean": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "image_std": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "do_pad": true
+  },
+  "processor_smoke": true,
+  "audit": {
+    "original_id": "synthetic",
+    "is_augmented": false,
+    "prompt_tokens": 886,
+    "full_tokens": 889,
+    "supervised_tokens": 3,
+    "decoded_supervision": " clean<end_of_utterance>\n",
+    "input_signature": "63eab8780a6276c00f11518f5f10be99918e1e94fea8e2cb5f9c8a63b1c95f5e",
+    "pixel_shape": [
+      1,
+      13,
+      3,
+      512,
+      512
+    ]
+  },
+  "batch_shapes": {
+    "input_ids": [
+      2,
+      889
+    ],
+    "attention_mask": [
+      2,
+      889
+    ],
+    "labels": [
+      2,
+      889
+    ],
+    "pixel_values": [
+      2,
+      13,
+      3,
+      512,
+      512
+    ],
+    "pixel_attention_mask": [
+      2,
+      13,
+      512,
+      512
+    ]
+  },
+  "gpu_idle": true
+}

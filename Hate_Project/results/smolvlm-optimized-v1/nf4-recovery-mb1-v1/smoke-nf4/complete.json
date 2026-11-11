@@ -1,0 +1,154 @@
+{
+  "mode": "nf4",
+  "controls": {
+    "model": "HuggingFaceTB/SmolVLM-256M-Instruct",
+    "revision": "7e3e67edbbed1bf9888184d9df282b700a323964",
+    "versions": {
+      "torch": "2.5.1",
+      "transformers": "4.57.1",
+      "peft": "0.17.1",
+      "accelerate": "1.10.1",
+      "bitsandbytes": "0.42.0",
+      "numpy": "1.26.4",
+      "Pillow": "11.3.0",
+      "huggingface-hub": "0.36.2",
+      "pandas": "2.3.2"
+    },
+    "lora": {
+      "r": 16,
+      "lora_alpha": 32,
+      "lora_dropout": 0.05,
+      "target_modules": [
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj",
+        "out_proj",
+        "gate_proj",
+        "up_proj",
+        "down_proj",
+        "fc1",
+        "fc2",
+        "lm_head",
+        "embed_tokens"
+      ],
+      "bias": "none",
+      "task_type": "CAUSAL_LM"
+    },
+    "data": {
+      "prepared_complete_sha256": "6a98f9aed939df8a720f6e924c744f42cadf49911ceb80b95100f28df10bb86a",
+      "validation_complete_sha256": "35bbbd527b80c13b70749ee39ffe3888814caa42b2253a0ae7ee05d4d1285f31",
+      "train_records": 18000,
+      "validation_counts": {
+        "clean_image_only": 1000,
+        "overlay_image_only": 1000,
+        "clean_with_transcription": 1000,
+        "overlay_with_transcription": 1000
+      },
+      "unique_image_files": 20000
+    },
+    "image_policy": "native processor defaults, no truncation",
+    "prompt_policy": "system instruction prepended verbatim to user text",
+    "quantization": {
+      "type": "nf4",
+      "compute": "float16",
+      "double_quant": false,
+      "scope": "eligible linear modules including vision"
+    },
+    "seed": 42,
+    "microbatch": 1,
+    "accumulation": 48,
+    "gradient_checkpointing": false,
+    "cpu_threads": 2,
+    "prefetch_depth": 2,
+    "image_preprocessing": "once per record with native processor; exact prefix checks",
+    "effective_batch": 48,
+    "learning_rate": 0.0002,
+    "max_epochs": 3,
+    "eval_steps": 75,
+    "patience": 3,
+    "monitor": "mean macro-F1 clean/overlay with transcription",
+    "min_delta": 0.0,
+    "lr_schedule": "linear decay over maximum 1125 updates, no warmup"
+  },
+  "inventory_sha256": "a9d165195b11f85f0f22856b3e889098619dd505906eefbb4843a4e285506d55",
+  "request_sha256": "92aa2257891fd36e820d65c38b8482c28de8f86d40290bb8cbc83ee0677c5c2a",
+  "initial_adapter_sha256": "c9955f5be6db674175531b303d4b5f354587993e289447e30cc8ae5fa7be3446",
+  "input_audits": [
+    {
+      "original_id": "TRAINING/10000.jpg",
+      "is_augmented": false,
+      "prompt_tokens": 955,
+      "full_tokens": 958,
+      "supervised_tokens": 3,
+      "decoded_supervision": " clean<end_of_utterance>\n",
+      "input_signature": "05eb33431aff2cf8829db10c5867570e5882d50e5442be1d8c2ee1e44535fa8b",
+      "pixel_shape": [
+        1,
+        13,
+        3,
+        512,
+        512
+      ]
+    },
+    {
+      "original_id": "TRAINING/10000.jpg",
+      "is_augmented": true,
+      "prompt_tokens": 934,
+      "full_tokens": 937,
+      "supervised_tokens": 3,
+      "decoded_supervision": " clean<end_of_utterance>\n",
+      "input_signature": "46a6c6b65e23c40cda184d833a6ce0ec7919d4961d65d125374458d3bfb955f7",
+      "pixel_shape": [
+        1,
+        13,
+        3,
+        512,
+        512
+      ]
+    },
+    {
+      "original_id": "TRAINING/10010.jpg",
+      "is_augmented": false,
+      "prompt_tokens": 1198,
+      "full_tokens": 1204,
+      "supervised_tokens": 6,
+      "decoded_supervision": " misogynous<end_of_utterance>\n",
+      "input_signature": "6fa079cd3e21864f84161d755935e7656988afef0ebfaf04a82b746d275757d4",
+      "pixel_shape": [
+        1,
+        17,
+        3,
+        512,
+        512
+      ]
+    },
+    {
+      "original_id": "TRAINING/10010.jpg",
+      "is_augmented": true,
+      "prompt_tokens": 1253,
+      "full_tokens": 1259,
+      "supervised_tokens": 6,
+      "decoded_supervision": " misogynous<end_of_utterance>\n",
+      "input_signature": "f6e3a033398df23f69a138cd262ef79590521240cbb3cbd985e14b6b81cabd0f",
+      "pixel_shape": [
+        1,
+        17,
+        3,
+        512,
+        512
+      ]
+    }
+  ],
+  "losses": [
+    10.937186241149902,
+    9.529568672180176,
+    5.187497138977051,
+    4.7545647621154785
+  ],
+  "gradient_norm": 318.2782287597656,
+  "optimizer_steps": 1,
+  "generated_answer": " Clean.",
+  "peak_allocated_bytes": 17937345536,
+  "qualification": "Small training-only sample at selected microbatch; not worst-case memory proof"
+}

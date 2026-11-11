@@ -1,0 +1,90 @@
+{
+  "epoch": 2,
+  "global_step": 750,
+  "mean_training_record_loss": 0.006552337736381646,
+  "training_wall_seconds": 11678.725337341428,
+  "validation_wall_seconds": 4253.224532505497,
+  "validation": {
+    "clean_image_only": {
+      "n": 1000,
+      "macro_f1": 0.953999815999264,
+      "accuracy": 0.954,
+      "invalid_count": 0,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          476,
+          24,
+          0
+        ],
+        [
+          22,
+          478,
+          0
+        ]
+      ],
+      "strict_format_compliance": 1.0,
+      "mean_teacher_forced_token_loss": 0.042949599714801064
+    },
+    "overlay_image_only": {
+      "n": 1000,
+      "macro_f1": 0.9189979749493737,
+      "accuracy": 0.919,
+      "invalid_count": 0,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          462,
+          38,
+          0
+        ],
+        [
+          43,
+          457,
+          0
+        ]
+      ],
+      "strict_format_compliance": 1.0,
+      "mean_teacher_forced_token_loss": 0.0711840243723129
+    },
+    "clean_with_transcription": {
+      "n": 1000,
+      "macro_f1": 0.9499967997951868,
+      "accuracy": 0.95,
+      "invalid_count": 0,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          471,
+          29,
+          0
+        ],
+        [
+          21,
+          479,
+          0
+        ]
+      ],
+      "strict_format_compliance": 1.0,
+      "mean_teacher_forced_token_loss": 0.046684134331739374
+    },
+    "overlay_with_transcription": {
+      "n": 1000,
+      "macro_f1": 0.928999360994249,
+      "accuracy": 0.929,
+      "invalid_count": 0,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          466,
+          34,
+          0
+        ],
+        [
+          37,
+          463,
+          0
+        ]
+      ],
+      "strict_format_compliance": 1.0,
+      "mean_teacher_forced_token_loss": 0.07085168949423773
+    }
+  },
+  "checkpoint": "epoch-2/adapter"
+}

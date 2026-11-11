@@ -1,0 +1,57 @@
+{
+  "arm": "fp16-lora",
+  "pattern": "center",
+  "prompt": "with_transcription",
+  "selection": "First matching ID in sorted order; illustrative example.",
+  "matching_pairs": 5,
+  "clean": {
+    "original_id": "TEST/15432.jpg",
+    "split": "test",
+    "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15432.jpg",
+    "image_sha256": "661fee4032eec017557cfefc2181df8b06809ea51fa78f9149b875ebe69cd395",
+    "system_prompt": "You are an automated classification API. You must output EXACTLY ONE WORD. Do not output any full sentences, explanations, or prefixes.",
+    "user_prompt": "Meme Text: 'When another girl laughs at your mans jokes... Her: simmer down ya dusty bitch he ain't that funny LUSH VALLEY WINERY ifunny.co'\n\nTask: Identify if this meme contains misogyny.\nAllowed Labels: 'misogynous' or 'clean'.\nAnswer:",
+    "target": "misogynous",
+    "is_augmented": false,
+    "emoji_code": null
+  },
+  "augmented": {
+    "original_id": "TEST/15432.jpg",
+    "split": "test",
+    "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/processed/mami_unseen_patterns_seed42/images_overlay/15432.jpg",
+    "image_sha256": "2037a7973a05f55ffe6eaffa58de356d30e6fba8a0d1156aded0dbd734214c95",
+    "system_prompt": "You are an automated classification API. You must output EXACTLY ONE WORD. Do not output any full sentences, explanations, or prefixes.",
+    "user_prompt": "Meme Text: 'When another girl laughs at your mans jokes... Her: simmer down ya dusty bitch he ain't that funny LUSH VALLEY WINERY ifunny.co'\n\nTask: Identify if this meme contains misogyny.\nAllowed Labels: 'misogynous' or 'clean'.\nAnswer:",
+    "target": "misogynous",
+    "is_augmented": true,
+    "emoji_code": "1f60a",
+    "pattern": "center"
+  },
+  "clean_prediction": {
+    "condition": "clean_with_transcription",
+    "original_id": "TEST/15432.jpg",
+    "true_label": 1,
+    "pred_label": 1,
+    "raw_answer": "misogynous",
+    "strict_format": true,
+    "generated_tokens": 5,
+    "input_tokens": 484,
+    "input_signature": "ca552ccd3853b307803743089fb5a93b533115b4da14fe0fdd36c827a9b12cd3",
+    "emoji_code": null
+  },
+  "augmented_prediction": {
+    "condition": "overlay_with_transcription",
+    "original_id": "TEST/15432.jpg",
+    "true_label": 1,
+    "pred_label": 0,
+    "raw_answer": "clean",
+    "strict_format": true,
+    "generated_tokens": 2,
+    "input_tokens": 484,
+    "input_signature": "fe4873509c7a6fe9f77301b79113c6b4ec7ff7c1ad4091d2fcc6d36cb67e3bc1",
+    "emoji_code": "1f60a",
+    "pattern": "center"
+  },
+  "clean_predictions_file": "results/mami_lora_qlora/test-1000-v1/fp16-lora/predictions.jsonl",
+  "augmented_predictions_file": "results/mami_lora_qlora/unseen-patterns-v1/fp16-lora/predictions.jsonl"
+}

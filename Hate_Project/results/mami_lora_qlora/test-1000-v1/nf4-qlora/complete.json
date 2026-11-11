@@ -1,0 +1,95 @@
+{
+  "arm": "nf4-qlora",
+  "n_originals": 1000,
+  "predictions": 4000,
+  "validation_used_for_selection": false,
+  "test_preparation_sha256": "5d5937f8dfe9368c7f08435dd4d365fb069b23bb11b59306d21075c034b243ea",
+  "training_completion_sha256": {
+    "fp16": "1308fae78b11fb1b92a25b7b8b53d2d5445bb82f69ccea8727035ecc5c00444e",
+    "nf4": "f94a9fb9547bc2fde39c0932c00d13829ca70075b891937b4bec190a2ebc7089"
+  },
+  "predictions_sha256": "c2272bb8d56b0cfd36052d358ade9bbf6ce4a2facc9cf88735a85bcb73642306",
+  "metadata_sha256": "b8c649b1cbdf5e2330007acdf565abd8146ae7c797c3041df271bebbb5df5dfb",
+  "metrics": {
+    "clean_image_only": {
+      "n": 1000,
+      "macro_f1": 0.8070544565826587,
+      "accuracy": 0.811,
+      "invalid_count": 0,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          334,
+          166,
+          0
+        ],
+        [
+          23,
+          477,
+          0
+        ]
+      ],
+      "strict_format_compliance": 1.0
+    },
+    "overlay_image_only": {
+      "n": 1000,
+      "macro_f1": 0.7827666995561944,
+      "accuracy": 0.786,
+      "invalid_count": 0,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          332,
+          168,
+          0
+        ],
+        [
+          46,
+          454,
+          0
+        ]
+      ],
+      "strict_format_compliance": 1.0
+    },
+    "clean_with_transcription": {
+      "n": 1000,
+      "macro_f1": 0.8130697923848924,
+      "accuracy": 0.817,
+      "invalid_count": 0,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          336,
+          164,
+          0
+        ],
+        [
+          19,
+          481,
+          0
+        ]
+      ],
+      "strict_format_compliance": 1.0
+    },
+    "overlay_with_transcription": {
+      "n": 1000,
+      "macro_f1": 0.7897142857142857,
+      "accuracy": 0.793,
+      "invalid_count": 0,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          334,
+          166,
+          0
+        ],
+        [
+          41,
+          459,
+          0
+        ]
+      ],
+      "strict_format_compliance": 1.0
+    }
+  },
+  "evaluation_wall_seconds": 3300.3406894300133,
+  "peak_inference_allocated_bytes": 7256270336,
+  "peak_inference_reserved_bytes": 8636071936,
+  "qualification": "One quality pass; wall time is not a controlled repeated latency benchmark; adapters unmerged"
+}

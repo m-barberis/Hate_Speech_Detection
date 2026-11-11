@@ -1,0 +1,77 @@
+{
+  "command": "smoke",
+  "mode": "nf4",
+  "controls": {
+    "model": "HuggingFaceTB/SmolVLM-256M-Instruct",
+    "revision": "7e3e67edbbed1bf9888184d9df282b700a323964",
+    "versions": {
+      "torch": "2.5.1",
+      "transformers": "4.57.1",
+      "peft": "0.17.1",
+      "accelerate": "1.10.1",
+      "bitsandbytes": "0.42.0",
+      "numpy": "1.26.4",
+      "Pillow": "11.3.0",
+      "huggingface-hub": "0.36.2",
+      "pandas": "2.3.2"
+    },
+    "lora": {
+      "r": 16,
+      "lora_alpha": 32,
+      "lora_dropout": 0.05,
+      "target_modules": [
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj",
+        "out_proj",
+        "gate_proj",
+        "up_proj",
+        "down_proj",
+        "fc1",
+        "fc2",
+        "lm_head",
+        "embed_tokens"
+      ],
+      "bias": "none",
+      "task_type": "CAUSAL_LM"
+    },
+    "data": {
+      "prepared_complete_sha256": "6a98f9aed939df8a720f6e924c744f42cadf49911ceb80b95100f28df10bb86a",
+      "validation_complete_sha256": "35bbbd527b80c13b70749ee39ffe3888814caa42b2253a0ae7ee05d4d1285f31",
+      "train_records": 18000,
+      "validation_counts": {
+        "clean_image_only": 1000,
+        "overlay_image_only": 1000,
+        "clean_with_transcription": 1000,
+        "overlay_with_transcription": 1000
+      },
+      "unique_image_files": 20000
+    },
+    "image_policy": "native processor defaults, no truncation",
+    "prompt_policy": "system instruction prepended verbatim to user text",
+    "quantization": {
+      "type": "nf4",
+      "compute": "float16",
+      "double_quant": false,
+      "scope": "eligible linear modules including vision"
+    },
+    "seed": 42,
+    "microbatch": 2,
+    "accumulation": 24,
+    "effective_batch": 48,
+    "learning_rate": 0.0002,
+    "max_epochs": 3,
+    "eval_steps": 75,
+    "patience": 3,
+    "monitor": "mean macro-F1 clean/overlay with transcription",
+    "min_delta": 0.0,
+    "lr_schedule": "linear decay over maximum 1125 updates, no warmup"
+  },
+  "source_sha256": {
+    "run.py": "eb42e643145f36a7484d3c1009353926a333708f50999de6aa53f740c8fa0886",
+    "summarize.py": "1d9dda2269852964b0371c0a302891b8a9d67ba393ae225a093a0958cb3cb3fb",
+    "cpu_model_check.py": "a889bf05580a4e8f9ecf2a37952c1f6bdfcd61e867235f6fd0165b1f72dc36b4",
+    "common.py": "ec1ea781638c758cb861a6dfbfcd42d79daf6c350757d787b77997b02bad1019"
+  }
+}

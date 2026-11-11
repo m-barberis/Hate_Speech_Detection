@@ -1,0 +1,198 @@
+{
+  "mode": "fp16",
+  "epochs": 2,
+  "optimizer_steps": 750,
+  "final_adapter": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/results/mami_lora_qlora/fp16-training-v2/epoch-2/adapter",
+  "final_checkpoint_policy": "epoch_2_without_validation_selection",
+  "final_adapter_sha256": "0cdaa90b01271d9213817a89d6763d91c4333091537e5f8fac25aed106167ba8",
+  "peak_training_allocated_bytes": 21666244096,
+  "peak_training_reserved_bytes": 33577500672,
+  "training_wall_seconds": 21413.63024047576,
+  "timing_scope": "epoch training loops including preprocessing, transfer, logging and optimizer; excludes loading, checkpoint saves and validation",
+  "memory_scope": "maximum training-update PyTorch allocation; excludes validation and loading peaks; reserved allocator history can include validation",
+  "epochs_summary": [
+    {
+      "epoch": 1,
+      "global_step": 375,
+      "mean_training_record_loss": 0.03739440879069242,
+      "training_wall_seconds": 10699.912254722789,
+      "validation_wall_seconds": 3581.078294079751,
+      "validation": {
+        "clean_image_only": {
+          "n": 1000,
+          "macro_f1": 0.9519807923169268,
+          "accuracy": 0.952,
+          "invalid_count": 0,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              486,
+              14,
+              0
+            ],
+            [
+              34,
+              466,
+              0
+            ]
+          ],
+          "strict_format_compliance": 1.0,
+          "mean_teacher_forced_token_loss": 0.034709326521695734
+        },
+        "overlay_image_only": {
+          "n": 1000,
+          "macro_f1": 0.9279261964251393,
+          "accuracy": 0.928,
+          "invalid_count": 0,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              480,
+              20,
+              0
+            ],
+            [
+              52,
+              448,
+              0
+            ]
+          ],
+          "strict_format_compliance": 1.0,
+          "mean_teacher_forced_token_loss": 0.05569498442750538
+        },
+        "clean_with_transcription": {
+          "n": 1000,
+          "macro_f1": 0.9549869912404685,
+          "accuracy": 0.955,
+          "invalid_count": 0,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              486,
+              14,
+              0
+            ],
+            [
+              31,
+              469,
+              0
+            ]
+          ],
+          "strict_format_compliance": 1.0,
+          "mean_teacher_forced_token_loss": 0.03622914353074448
+        },
+        "overlay_with_transcription": {
+          "n": 1000,
+          "macro_f1": 0.9278958816531071,
+          "accuracy": 0.928,
+          "invalid_count": 0,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              483,
+              17,
+              0
+            ],
+            [
+              55,
+              445,
+              0
+            ]
+          ],
+          "strict_format_compliance": 1.0,
+          "mean_teacher_forced_token_loss": 0.05555859404492836
+        }
+      },
+      "checkpoint": "epoch-1/adapter"
+    },
+    {
+      "epoch": 2,
+      "global_step": 750,
+      "mean_training_record_loss": 0.005959519088521611,
+      "training_wall_seconds": 10713.71798575297,
+      "validation_wall_seconds": 3590.2630656957626,
+      "validation": {
+        "clean_image_only": {
+          "n": 1000,
+          "macro_f1": 0.9589979909015542,
+          "accuracy": 0.959,
+          "invalid_count": 0,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              483,
+              17,
+              0
+            ],
+            [
+              24,
+              476,
+              0
+            ]
+          ],
+          "strict_format_compliance": 1.0,
+          "mean_teacher_forced_token_loss": 0.04040656542664481
+        },
+        "overlay_image_only": {
+          "n": 1000,
+          "macro_f1": 0.9209822209997249,
+          "accuracy": 0.921,
+          "invalid_count": 0,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              468,
+              32,
+              0
+            ],
+            [
+              47,
+              453,
+              0
+            ]
+          ],
+          "strict_format_compliance": 1.0,
+          "mean_teacher_forced_token_loss": 0.06242161957231431
+        },
+        "clean_with_transcription": {
+          "n": 1000,
+          "macro_f1": 0.952999576996193,
+          "accuracy": 0.953,
+          "invalid_count": 0,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              478,
+              22,
+              0
+            ],
+            [
+              25,
+              475,
+              0
+            ]
+          ],
+          "strict_format_compliance": 1.0,
+          "mean_teacher_forced_token_loss": 0.04923912330504122
+        },
+        "overlay_with_transcription": {
+          "n": 1000,
+          "macro_f1": 0.9269788969012045,
+          "accuracy": 0.927,
+          "invalid_count": 0,
+          "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+            [
+              472,
+              28,
+              0
+            ],
+            [
+              45,
+              455,
+              0
+            ]
+          ],
+          "strict_format_compliance": 1.0,
+          "mean_teacher_forced_token_loss": 0.066484486016484
+        }
+      },
+      "checkpoint": "epoch-2/adapter"
+    }
+  ],
+  "validation_complete_sha256": "35bbbd527b80c13b70749ee39ffe3888814caa42b2253a0ae7ee05d4d1285f31",
+  "initial_adapter_sha256": "23031894c7d1f7e624ffa6791a3fab47b8f96dc38ab2910442460cd8850d6e79",
+  "training_plan_sha256": "176eda920295ff1706bdeddcb895e112539b6075dc2ca0dcd4972489f2604583"
+}

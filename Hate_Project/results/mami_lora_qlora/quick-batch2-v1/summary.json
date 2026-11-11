@@ -1,0 +1,228 @@
+{
+  "fp16": {
+    "cached": {
+      "median_wall_seconds": 45.640776336193085,
+      "speedup_over_baseline": 1.0,
+      "peak_allocated_bytes": 19045167104,
+      "correctness_loss_delta": 0.0,
+      "gradient_relative_l2": 0.0,
+      "gradient_max_absolute_difference": 0.0,
+      "reference_variant": "cached",
+      "sample_memory_checks": [],
+      "cached_sample_tensor_bytes": 402075936,
+      "qualification": "Review numerical differences; no automatic equivalence claim or variant selection"
+    },
+    "batch2-full": {
+      "median_wall_seconds": 27.817772425711155,
+      "speedup_over_baseline": 1.6407056480916729,
+      "peak_allocated_bytes": 20131992576,
+      "correctness_loss_delta": -0.0012843827717006207,
+      "gradient_relative_l2": 0.031266427405986695,
+      "gradient_max_absolute_difference": 0.30877685546875,
+      "reference_variant": "cached",
+      "sample_memory_checks": [
+        {
+          "metric": "full_tokens",
+          "records": [
+            {
+              "original_id": "TRAINING/10010.jpg",
+              "target": "misogynous",
+              "is_augmented": true,
+              "has_transcription": true,
+              "prompt_tokens": 515,
+              "full_tokens": 521,
+              "supervised_tokens": 6,
+              "decoded_supervision": "misogynous<|im_end|>\n",
+              "input_signature": "45b472739622ad7f7f4ac6e8e198a755f72123c6df97fc393a43abf67967c36b",
+              "image_grid_thw": [
+                [
+                  1,
+                  40,
+                  40
+                ]
+              ]
+            },
+            {
+              "original_id": "TRAINING/8931.jpg",
+              "target": "clean",
+              "is_augmented": true,
+              "has_transcription": true,
+              "prompt_tokens": 501,
+              "full_tokens": 504,
+              "supervised_tokens": 3,
+              "decoded_supervision": "clean<|im_end|>\n",
+              "input_signature": "31f65d3d0255a9e7429522306afd1cef2e3c2d4f7904639f358c35aeb65a6968",
+              "image_grid_thw": [
+                [
+                  1,
+                  40,
+                  40
+                ]
+              ]
+            }
+          ],
+          "peak_allocated_bytes": 20010627072,
+          "peak_reserved_bytes": 31002198016
+        },
+        {
+          "metric": "vision_patches",
+          "records": [
+            {
+              "original_id": "TRAINING/2529.jpg",
+              "target": "misogynous",
+              "is_augmented": true,
+              "has_transcription": false,
+              "prompt_tokens": 468,
+              "full_tokens": 474,
+              "supervised_tokens": 6,
+              "decoded_supervision": "misogynous<|im_end|>\n",
+              "input_signature": "823e674e82981f0f1a2d66b73d33d4fec9a28ebb148623b8fbe094790af82cc2",
+              "image_grid_thw": [
+                [
+                  1,
+                  40,
+                  40
+                ]
+              ]
+            },
+            {
+              "original_id": "TRAINING/1778.jpg",
+              "target": "clean",
+              "is_augmented": true,
+              "has_transcription": true,
+              "prompt_tokens": 497,
+              "full_tokens": 500,
+              "supervised_tokens": 3,
+              "decoded_supervision": "clean<|im_end|>\n",
+              "input_signature": "361d99a045e801fd7beac44e0e33c6efd9f6309d2acd6ce7ec55ad581db1d6a7",
+              "image_grid_thw": [
+                [
+                  1,
+                  40,
+                  40
+                ]
+              ]
+            }
+          ],
+          "peak_allocated_bytes": 19920344064,
+          "peak_reserved_bytes": 31002198016
+        }
+      ],
+      "cached_sample_tensor_bytes": 402075936,
+      "qualification": "Review numerical differences; no automatic equivalence claim or variant selection"
+    }
+  },
+  "nf4": {
+    "cached": {
+      "median_wall_seconds": 49.83774081990123,
+      "speedup_over_baseline": 1.0,
+      "peak_allocated_bytes": 9151165440,
+      "correctness_loss_delta": 0.0,
+      "gradient_relative_l2": 0.0,
+      "gradient_max_absolute_difference": 0.0,
+      "reference_variant": "cached",
+      "sample_memory_checks": [],
+      "cached_sample_tensor_bytes": 402075936,
+      "qualification": "Review numerical differences; no automatic equivalence claim or variant selection"
+    },
+    "batch2-full": {
+      "median_wall_seconds": 30.694584731012583,
+      "speedup_over_baseline": 1.6236655832501674,
+      "peak_allocated_bytes": 11130689536,
+      "correctness_loss_delta": 0.0001639598049223423,
+      "gradient_relative_l2": 0.027773446586517266,
+      "gradient_max_absolute_difference": 0.3158416748046875,
+      "reference_variant": "cached",
+      "sample_memory_checks": [
+        {
+          "metric": "full_tokens",
+          "records": [
+            {
+              "original_id": "TRAINING/10010.jpg",
+              "target": "misogynous",
+              "is_augmented": true,
+              "has_transcription": true,
+              "prompt_tokens": 515,
+              "full_tokens": 521,
+              "supervised_tokens": 6,
+              "decoded_supervision": "misogynous<|im_end|>\n",
+              "input_signature": "45b472739622ad7f7f4ac6e8e198a755f72123c6df97fc393a43abf67967c36b",
+              "image_grid_thw": [
+                [
+                  1,
+                  40,
+                  40
+                ]
+              ]
+            },
+            {
+              "original_id": "TRAINING/8931.jpg",
+              "target": "clean",
+              "is_augmented": true,
+              "has_transcription": true,
+              "prompt_tokens": 501,
+              "full_tokens": 504,
+              "supervised_tokens": 3,
+              "decoded_supervision": "clean<|im_end|>\n",
+              "input_signature": "31f65d3d0255a9e7429522306afd1cef2e3c2d4f7904639f358c35aeb65a6968",
+              "image_grid_thw": [
+                [
+                  1,
+                  40,
+                  40
+                ]
+              ]
+            }
+          ],
+          "peak_allocated_bytes": 11067413504,
+          "peak_reserved_bytes": 18350080000
+        },
+        {
+          "metric": "vision_patches",
+          "records": [
+            {
+              "original_id": "TRAINING/2529.jpg",
+              "target": "misogynous",
+              "is_augmented": true,
+              "has_transcription": false,
+              "prompt_tokens": 468,
+              "full_tokens": 474,
+              "supervised_tokens": 6,
+              "decoded_supervision": "misogynous<|im_end|>\n",
+              "input_signature": "823e674e82981f0f1a2d66b73d33d4fec9a28ebb148623b8fbe094790af82cc2",
+              "image_grid_thw": [
+                [
+                  1,
+                  40,
+                  40
+                ]
+              ]
+            },
+            {
+              "original_id": "TRAINING/1778.jpg",
+              "target": "clean",
+              "is_augmented": true,
+              "has_transcription": true,
+              "prompt_tokens": 497,
+              "full_tokens": 500,
+              "supervised_tokens": 3,
+              "decoded_supervision": "clean<|im_end|>\n",
+              "input_signature": "361d99a045e801fd7beac44e0e33c6efd9f6309d2acd6ce7ec55ad581db1d6a7",
+              "image_grid_thw": [
+                [
+                  1,
+                  40,
+                  40
+                ]
+              ]
+            }
+          ],
+          "peak_allocated_bytes": 10904430592,
+          "peak_reserved_bytes": 18350080000
+        }
+      ],
+      "cached_sample_tensor_bytes": 402075936,
+      "qualification": "Review numerical differences; no automatic equivalence claim or variant selection"
+    }
+  }
+}

@@ -1,0 +1,180 @@
+{
+  "mode": "nf4",
+  "variant": "batch2-full",
+  "microbatch": 2,
+  "records_per_pass": 48,
+  "passes": [
+    {
+      "repetition": 0,
+      "wall_seconds": 30.694584731012583,
+      "mean_record_loss": 0.12677531883430976,
+      "gradient_norm": 44.16815948486328,
+      "peak_allocated_bytes": 11130689536,
+      "peak_reserved_bytes": 18350080000
+    }
+  ],
+  "median_wall_seconds": 30.694584731012583,
+  "cache_preparation_seconds": 2.995131401345134,
+  "initial_adapter_sha256": "23031894c7d1f7e624ffa6791a3fab47b8f96dc38ab2910442460cd8850d6e79",
+  "correctness_mean_record_loss": 0.11748426593840122,
+  "correctness_gradient_file_sha256": "cc58ef0f60c47a5c87817552ac713e1752cb7eaf5bb2c3fe42d41c2e0138b697",
+  "timing_input_signatures": [
+    "8d4580ca0e29f52f83aaf392b4ea821017059ed0fa3aab82752057e58c488299",
+    "c34edc326d89df73637d27a26bf76c05f28e1301ad3ae822ede36efe964b83fe",
+    "bb8d9bdb48961b61bbac9e763adf4a24216ae75d3cc69621f1e62b5fb0ffbe3f",
+    "ecf5f92921240d79704cac93b54a273af5dfae91fb8474608ac26752d472c928",
+    "9e1d7a35fcd053580b38585c67eda237c369586f78d76ffd289bf1d12775ce9f",
+    "092d1030e917bc6376227debc35531c709f6644b5c7c5cd712c9c94bb9af9496",
+    "b282ec92ffd90370d26a3966eff5f4587da01864b1a2ff3cd9c1f7836a9e6f3d",
+    "96c07a091c37a13e066760bb2a1da4cde40b3e9e19501087271f2b2829cadc89",
+    "b370084331491db7030ba7b30a90fc333839a2095dc6abea96fb9a47bd7995de",
+    "5a1d6bf4524d5a3342ebe18e940bc92a2ecc3cd9dc5c463f9e01c938139ebef9",
+    "9f0479c727b00d18712a90f0be21623ce04d1eb267b82b6de76c4ef76c9918b5",
+    "7b3f5073d392aa09abcc389907b187a0ba43150760521ce839a816cb4132b04e",
+    "2891eda34727d2b7d78d37e3b571606b4af197cb9206b9580ea2eca125cdf926",
+    "823e674e82981f0f1a2d66b73d33d4fec9a28ebb148623b8fbe094790af82cc2",
+    "d7b2d0aa26ad30b6c76e5695b3bb7700a947b9d99a3eb46675065362ecf93b83",
+    "710cff0f5f9b1ecf4dd088ca826b5494a83fff8f48933254e115f4cabe56390d",
+    "1ebfb85b46c33cb6549a1717d18c5a99fcd15f3e368c94d2977abc1a40687280",
+    "846c255584fc384083fb532e2be9351db90624f1173930d9a2f6e8a2eba664dd",
+    "d5618c7136465993354e75f65c433d83d5b98f974dd4dc2ee161691ce458cf2e",
+    "167b80fb33225aade64f567e53561cc82e64fd897a915308636c901b201f921f",
+    "481868f160532384c7d5c381338d4f622da2aa0799121a3f75fbd0f511780fdb",
+    "52490a43a518c36ab2e4c029137936b5374d7ee524bee3fa4a716ad466d8a084",
+    "361d99a045e801fd7beac44e0e33c6efd9f6309d2acd6ce7ec55ad581db1d6a7",
+    "4aba962b0213c5248405ff41554f6c92e665f2f9c85be3d57b1b7d5324bd8d80",
+    "df260b460e64f5a4efdb1291f7e977b63364067af11773aa99af4f003b75f98c",
+    "d5296c412cfdc7f62845c67a1e6c80597064a9796049a04a290f350d9adf015a",
+    "a0eaa0ccc5908ad2cbe2a0229d1c7a69add92a79921df2429ab3bd3b75e0260c",
+    "8f9b0c85c8e9b77ec3b05a004945152b24819af950d756473d9246cfed2028ff",
+    "2ad9a33f5bffdec27f5920cc9f8df07c944726710c83b881b871b1f6984f016a",
+    "5d1db652ac0e0439cd56732eef7f8fd5f1f22fd06b20182c64f5149eb003f41f",
+    "4ed1050cbe8365d99fb91aa183f9157ad6ca0681827b595ca21412e62949bed1",
+    "31f65d3d0255a9e7429522306afd1cef2e3c2d4f7904639f358c35aeb65a6968",
+    "13dd05962f7c062d5d929d5f20be3dd33dc4d8388476d6554350edb53b3702d2",
+    "21177f45ddcc220f9f82d4f937d0a6eb39daa26209bc869eabfe16eee75bc45c",
+    "b2a3f64fdbc95aab061c37099face6278b09361dcaab7c1ea4140d9b829118e2",
+    "d09b4434fa47c3280ad68ec5f13ed417e80366331598f52e61f9dfa535197c57",
+    "0888edc3b72ac3dcccfc07599b3f8624c7e88a03565c988b640c93485d3a5d24",
+    "2169d3b2ac613d530052775415417c96ccd7276f395559c34ea50b63a495ee9b",
+    "d15df4a8043e22218b9c06a3e4f7a00a2ca0709567bb55093f01639addff7117",
+    "aa0391bde9d015d81670697db4aa4a5d9d368c7541cf6af4d5f475b3c530e90d",
+    "4dbeda0a4745099c0be0dfbdbc549fc8f6622464e2bdae3a24d68d2b3ddd2e83",
+    "9cd7e2da683d64c19c09f724a56f1dda935f4c85afdc28efa0bf1e7583f1a6cc",
+    "28abe69f95b2f8cb41874fe97c5aa7e3dfcda147d8031aff3c6df181bb9e3251",
+    "a4a7c4395a905b2a66406dd4f4ef306a8faac3b5771079481b74a3a10aff6e5e",
+    "3e72e1a7bbf20c9f082e5d9895ee0a50aa60b112a4fe53e00db99f3fc61f2ee1",
+    "080c6da5dfb723b28d5418547eed11278fdf82e7052cb8441b465c74fd5df3b7",
+    "6cd2eefe4ba5d6553f8bd9574e535910ba74911bb0eafbb02495396f9d237cef",
+    "faef6086b838b7d035c506ab7066ca52564ed0900fb45a0ccc1437dbe7fcdd18"
+  ],
+  "correctness_ids": [
+    {
+      "original_id": "TRAINING/10000.jpg",
+      "is_augmented": false
+    },
+    {
+      "original_id": "TRAINING/10000.jpg",
+      "is_augmented": true
+    },
+    {
+      "original_id": "TRAINING/10010.jpg",
+      "is_augmented": false
+    },
+    {
+      "original_id": "TRAINING/10010.jpg",
+      "is_augmented": true
+    }
+  ],
+  "qualification": "Disposable first optimizer steps, 48-record RAM cache, training-only inputs; not full-run throughput or bitwise equivalence",
+  "sample_memory_checks": [
+    {
+      "metric": "full_tokens",
+      "records": [
+        {
+          "original_id": "TRAINING/10010.jpg",
+          "target": "misogynous",
+          "is_augmented": true,
+          "has_transcription": true,
+          "prompt_tokens": 515,
+          "full_tokens": 521,
+          "supervised_tokens": 6,
+          "decoded_supervision": "misogynous<|im_end|>\n",
+          "input_signature": "45b472739622ad7f7f4ac6e8e198a755f72123c6df97fc393a43abf67967c36b",
+          "image_grid_thw": [
+            [
+              1,
+              40,
+              40
+            ]
+          ]
+        },
+        {
+          "original_id": "TRAINING/8931.jpg",
+          "target": "clean",
+          "is_augmented": true,
+          "has_transcription": true,
+          "prompt_tokens": 501,
+          "full_tokens": 504,
+          "supervised_tokens": 3,
+          "decoded_supervision": "clean<|im_end|>\n",
+          "input_signature": "31f65d3d0255a9e7429522306afd1cef2e3c2d4f7904639f358c35aeb65a6968",
+          "image_grid_thw": [
+            [
+              1,
+              40,
+              40
+            ]
+          ]
+        }
+      ],
+      "peak_allocated_bytes": 11067413504,
+      "peak_reserved_bytes": 18350080000
+    },
+    {
+      "metric": "vision_patches",
+      "records": [
+        {
+          "original_id": "TRAINING/2529.jpg",
+          "target": "misogynous",
+          "is_augmented": true,
+          "has_transcription": false,
+          "prompt_tokens": 468,
+          "full_tokens": 474,
+          "supervised_tokens": 6,
+          "decoded_supervision": "misogynous<|im_end|>\n",
+          "input_signature": "823e674e82981f0f1a2d66b73d33d4fec9a28ebb148623b8fbe094790af82cc2",
+          "image_grid_thw": [
+            [
+              1,
+              40,
+              40
+            ]
+          ]
+        },
+        {
+          "original_id": "TRAINING/1778.jpg",
+          "target": "clean",
+          "is_augmented": true,
+          "has_transcription": true,
+          "prompt_tokens": 497,
+          "full_tokens": 500,
+          "supervised_tokens": 3,
+          "decoded_supervision": "clean<|im_end|>\n",
+          "input_signature": "361d99a045e801fd7beac44e0e33c6efd9f6309d2acd6ce7ec55ad581db1d6a7",
+          "image_grid_thw": [
+            [
+              1,
+              40,
+              40
+            ]
+          ]
+        }
+      ],
+      "peak_allocated_bytes": 10904430592,
+      "peak_reserved_bytes": 18350080000
+    }
+  ],
+  "cached_sample_tensor_bytes": 402075936,
+  "adapter_saved": false
+}

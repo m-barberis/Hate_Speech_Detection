@@ -1,0 +1,72 @@
+{
+  "mode": "fp16",
+  "checkpoint": {
+    "model": "QCRI/MemeLens-VLM",
+    "revision": "a633183849df60a37251d29c3f1b0d379ae801f5"
+  },
+  "versions": {
+    "torch": "2.5.1",
+    "transformers": "4.57.1",
+    "accelerate": "1.10.1",
+    "bitsandbytes": "0.42.0",
+    "peft": "0.17.1",
+    "numpy": "1.26.4",
+    "Pillow": "11.3.0"
+  },
+  "prepared_complete_sha256": "6a98f9aed939df8a720f6e924c744f42cadf49911ceb80b95100f28df10bb86a",
+  "prepared_manifest_sha256": "d69f7fdcd8e0c8675bb1fb256a61271ef150e4c22441bf3102edc241a25e3a2c",
+  "legacy_trainer_sha256": "c4ad398dc14886ada5af260bbb5f112d025a835b419dcd008147d1bb7cc6ab18",
+  "runner_sha256": "25eb398b3f546ce75461686ff5179823a621232d81e18df69a9c0d5d2a67a6ef",
+  "lora": {
+    "r": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0.05,
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj",
+      "fc1",
+      "fc2",
+      "linear_q",
+      "linear_k",
+      "linear_v",
+      "linear_o",
+      "lm_head",
+      "embed_tokens"
+    ],
+    "bias": "none",
+    "task_type": "CAUSAL_LM"
+  },
+  "learning_rate": 0.0002,
+  "shared_init_metadata_sha256": "04164fe9dc27d7eaac0dd98998dcedb5b655c7bd3394dbd6c8f749c1c020c26d",
+  "shared_init_weights_sha256": "093172c931d1237e90fcbe249480d45015089e0b32e7f6995092a0568a866aa8",
+  "adapter_hash_schema": "sorted-name-shape-fp32-le-v1",
+  "smoke_microbatches": 4,
+  "gradient_checkpointing": "nonreentrant",
+  "max_pixels": 524288,
+  "min_pixels": 4096,
+  "dispatch_force_hooks": true,
+  "base_policy": "frozen loaded dtype; FP32 adapters; FP16 autocast",
+  "selected": [
+    {
+      "original_id": "TRAINING/10000.jpg",
+      "is_augmented": false
+    },
+    {
+      "original_id": "TRAINING/10000.jpg",
+      "is_augmented": true
+    },
+    {
+      "original_id": "TRAINING/10010.jpg",
+      "is_augmented": false
+    },
+    {
+      "original_id": "TRAINING/10010.jpg",
+      "is_augmented": true
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "epoch": 1,
+  "global_step": 375,
+  "mean_training_record_loss": 0.03739440879069242,
+  "training_wall_seconds": 10699.912254722789,
+  "validation_wall_seconds": 3581.078294079751,
+  "validation": {
+    "clean_image_only": {
+      "n": 1000,
+      "macro_f1": 0.9519807923169268,
+      "accuracy": 0.952,
+      "invalid_count": 0,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          486,
+          14,
+          0
+        ],
+        [
+          34,
+          466,
+          0
+        ]
+      ],
+      "strict_format_compliance": 1.0,
+      "mean_teacher_forced_token_loss": 0.034709326521695734
+    },
+    "overlay_image_only": {
+      "n": 1000,
+      "macro_f1": 0.9279261964251393,
+      "accuracy": 0.928,
+      "invalid_count": 0,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          480,
+          20,
+          0
+        ],
+        [
+          52,
+          448,
+          0
+        ]
+      ],
+      "strict_format_compliance": 1.0,
+      "mean_teacher_forced_token_loss": 0.05569498442750538
+    },
+    "clean_with_transcription": {
+      "n": 1000,
+      "macro_f1": 0.9549869912404685,
+      "accuracy": 0.955,
+      "invalid_count": 0,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          486,
+          14,
+          0
+        ],
+        [
+          31,
+          469,
+          0
+        ]
+      ],
+      "strict_format_compliance": 1.0,
+      "mean_teacher_forced_token_loss": 0.03622914353074448
+    },
+    "overlay_with_transcription": {
+      "n": 1000,
+      "macro_f1": 0.9278958816531071,
+      "accuracy": 0.928,
+      "invalid_count": 0,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          483,
+          17,
+          0
+        ],
+        [
+          55,
+          445,
+          0
+        ]
+      ],
+      "strict_format_compliance": 1.0,
+      "mean_teacher_forced_token_loss": 0.05555859404492836
+    }
+  },
+  "checkpoint": "epoch-1/adapter"
+}

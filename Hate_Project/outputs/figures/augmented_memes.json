@@ -1,0 +1,41 @@
+{
+  "selection": "First matching ID in sorted order; illustrative examples.",
+  "training": {
+    "original_id": "TRAINING/10.jpg",
+    "split": "train",
+    "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/processed/mami_lora_qlora_seed42/train/images_augmented/aug_10.jpg",
+    "system_prompt": "You are an automated classification API. You must output EXACTLY ONE WORD. Do not output any full sentences, explanations, or prefixes.",
+    "user_prompt": "Task: Identify if this meme contains misogyny.\nAllowed Labels: 'misogynous' or 'clean'.\nAnswer:",
+    "target": "misogynous",
+    "is_augmented": true,
+    "emoji_code": "1f47b",
+    "image_sha256": "fecb21344b9bfcb1a69092402c1f4d802d81c3b524e20b6ecfc71e8389eabe83"
+  },
+  "test": {
+    "original_id": "TEST/15146.jpg",
+    "split": "test",
+    "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/processed/mami_unseen_patterns_seed42/images_overlay/15146.jpg",
+    "image_sha256": "efb1b329904b5bf36b27479eff2f25d48ececab272781e76eaa821b14d170090",
+    "system_prompt": "You are an automated classification API. You must output EXACTLY ONE WORD. Do not output any full sentences, explanations, or prefixes.",
+    "user_prompt": "Meme Text: 'INSISTS THAT WOMEN HAVE A RIGHT TO SEXUAL OBJECT PREFERENCE DEMONIZES MEN WHO DERIVE PLEASURE FROM LOOKING AT ATTRACTIVE WOMEN'\n\nTask: Identify if this meme contains misogyny.\nAllowed Labels: 'misogynous' or 'clean'.\nAnswer:",
+    "target": "misogynous",
+    "is_augmented": true,
+    "emoji_code": "1f609",
+    "pattern": "sparse_random"
+  },
+  "prediction": {
+    "condition": "overlay_with_transcription",
+    "original_id": "TEST/15146.jpg",
+    "true_label": 1,
+    "pred_label": 0,
+    "raw_answer": "clean",
+    "strict_format": true,
+    "generated_tokens": 2,
+    "input_tokens": 386,
+    "input_signature": "0885790d8bac12be52b522e8833e20c886cdb9bbe82cbae51cd1c15b153ff464",
+    "emoji_code": "1f609",
+    "pattern": "sparse_random"
+  },
+  "arm": "fp16-lora",
+  "condition": "overlay_with_transcription"
+}

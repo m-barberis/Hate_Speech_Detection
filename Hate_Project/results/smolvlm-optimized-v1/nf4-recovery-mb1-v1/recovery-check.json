@@ -1,0 +1,34 @@
+{
+  "fp16_training_root": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/results/smolvlm-optimized-v1/fp16-training",
+  "fp16_best_step": 525,
+  "fp16_completion_sha256": "125c198dd26efd07fab05cddfb1ac4d298700d80c3cd13aa5679b239a782254d",
+  "training_comparison": {
+    "strict_execution_match": false,
+    "execution_differences": {
+      "microbatch": {
+        "fp16": 2,
+        "nf4": 1
+      },
+      "accumulation": {
+        "fp16": 24,
+        "nf4": 48
+      }
+    },
+    "execution_settings": {
+      "fp16": {
+        "microbatch": 2,
+        "accumulation": 24,
+        "gradient_checkpointing": false,
+        "cpu_threads": 2
+      },
+      "nf4": {
+        "microbatch": 1,
+        "accumulation": 48,
+        "gradient_checkpointing": false,
+        "cpu_threads": 2
+      }
+    },
+    "qualification": "Effective batch and experiment controls match; memory execution settings differ. Rounding and dropout draws may differ; runtime differences cannot be attributed solely to quantization."
+  },
+  "initial_adapter_sha256": "c9955f5be6db674175531b303d4b5f354587993e289447e30cc8ae5fa7be3446"
+}

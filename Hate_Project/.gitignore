@@ -4,16 +4,32 @@ data/raw/**
 data/assets/**
 data/interim/**
 data/processed/**
-outputs/**
-results/interview_preparation/**
+
+
 !data/**/
-!outputs/**/
+
 !data/**/.gitkeep
-!outputs/**/.gitkeep
-!outputs/reports/
-!outputs/reports/**
-!outputs/figures/
-!outputs/figures/**
+
+# Ignore experiment artifacts, then allow JSON files at any depth.
+/results/**
+!/results/**/
+!/results/**/*.json
+/outputs/**
+!/outputs/**/
+!/outputs/**/*.json
+!/outputs/**/.gitkeep
+
+# Exclude model/tokenizer folders, including their JSON files.
+/results/**/adapter/
+/results/**/processor/
+/results/**/checkpoint-*/
+/outputs/**/adapter/
+/outputs/**/processor/
+/outputs/**/checkpoint-*/
+
+# Preserve existing exclusions.
+/results/interview_preparation/
+/results/emoji_overlay_eval/full_20variants_1gpu/predictions/
 
 # Python environments and generated files
 .venv/

@@ -1,0 +1,137 @@
+{
+  "arm": "fp16-base",
+  "model": "HuggingFaceTB/SmolVLM-256M-Instruct",
+  "revision": "7e3e67edbbed1bf9888184d9df282b700a323964",
+  "versions": {
+    "torch": "2.5.1",
+    "transformers": "4.57.1",
+    "peft": "0.17.1",
+    "accelerate": "1.10.1",
+    "bitsandbytes": "0.42.0",
+    "numpy": "1.26.4",
+    "Pillow": "11.3.0",
+    "huggingface-hub": "0.36.2",
+    "pandas": "2.3.2"
+  },
+  "quantized_modules": [],
+  "summary": {
+    "clean_image_only": {
+      "n": 1000,
+      "macro_f1": 0.5720324101946619,
+      "accuracy": 0.564,
+      "invalid_count": 38,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          242,
+          234,
+          24
+        ],
+        [
+          164,
+          322,
+          14
+        ]
+      ],
+      "strict_format_compliance": 0.0,
+      "wall_seconds": 941.2409233413637,
+      "peak_allocated_bytes": 1062946304
+    },
+    "overlay_image_only": {
+      "n": 1000,
+      "macro_f1": 0.48921433361667954,
+      "accuracy": 0.501,
+      "invalid_count": 29,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          346,
+          144,
+          10
+        ],
+        [
+          326,
+          155,
+          19
+        ]
+      ],
+      "strict_format_compliance": 0.0,
+      "wall_seconds": 911.7855130955577,
+      "peak_allocated_bytes": 1061897728
+    },
+    "clean_with_transcription": {
+      "n": 1000,
+      "macro_f1": 0.5578235369664797,
+      "accuracy": 0.54,
+      "invalid_count": 66,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          252,
+          206,
+          42
+        ],
+        [
+          188,
+          288,
+          24
+        ]
+      ],
+      "strict_format_compliance": 0.0,
+      "wall_seconds": 944.5426877811551,
+      "peak_allocated_bytes": 1062012416
+    },
+    "overlay_with_transcription": {
+      "n": 1000,
+      "macro_f1": 0.5106687528477232,
+      "accuracy": 0.519,
+      "invalid_count": 34,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          352,
+          127,
+          21
+        ],
+        [
+          320,
+          167,
+          13
+        ]
+      ],
+      "strict_format_compliance": 0.0,
+      "wall_seconds": 913.55913021788,
+      "peak_allocated_bytes": 1062012416
+    }
+  },
+  "training_comparison": {
+    "strict_execution_match": false,
+    "execution_differences": {
+      "microbatch": {
+        "fp16": 2,
+        "nf4": 1
+      },
+      "accumulation": {
+        "fp16": 24,
+        "nf4": 48
+      }
+    },
+    "execution_settings": {
+      "fp16": {
+        "microbatch": 2,
+        "accumulation": 24,
+        "gradient_checkpointing": false,
+        "cpu_threads": 2
+      },
+      "nf4": {
+        "microbatch": 1,
+        "accumulation": 48,
+        "gradient_checkpointing": false,
+        "cpu_threads": 2
+      }
+    },
+    "qualification": "Effective batch and experiment controls match; memory execution settings differ. Rounding and dropout draws may differ; runtime differences cannot be attributed solely to quantization."
+  },
+  "best_step": null,
+  "test_preparation_sha256": "5d5937f8dfe9368c7f08435dd4d365fb069b23bb11b59306d21075c034b243ea",
+  "training_completion_sha256": {
+    "fp16": "125c198dd26efd07fab05cddfb1ac4d298700d80c3cd13aa5679b239a782254d",
+    "nf4": "175e9ac9c57b12a2a1cba98158e4f1f002f0f50ba15f31073d2320a8414723d7"
+  }
+}

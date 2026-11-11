@@ -1,0 +1,14 @@
+{
+  "mode": "nf4",
+  "microbatches": 4,
+  "optimizer_steps": 1,
+  "gradient_norm": 46.98143768310547,
+  "gradient_parameter_count": 508,
+  "trainable_without_gradient": [],
+  "initial_adapter_sha256": "d776819863e1a7a2effd344a0b9becb6d52378a25ae8bf385de3753a99bb3b3f",
+  "updated_adapter_sha256": "1209ad34c70e4e526b97b676ff61231b2b4d522ec3fa8c4b02986e2d8a1f33e7",
+  "peak_allocated_bytes": 9374896640,
+  "peak_reserved_bytes": 10101981184,
+  "qualification": "Four training records only; not full-run memory or speed evidence",
+  "adapter_saved": false
+}

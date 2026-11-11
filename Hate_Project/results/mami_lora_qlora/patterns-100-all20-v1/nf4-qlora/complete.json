@@ -1,0 +1,38 @@
+{
+  "arm": "nf4-qlora",
+  "n_originals": 100,
+  "predictions": 2000,
+  "validation_used_for_selection": false,
+  "test_preparation_sha256": "7af26dfe0e6f81f44bbc47c3235c7ab5b0b458b93f69df82822febebaade5cd6",
+  "training_completion_sha256": {
+    "fp16": "1308fae78b11fb1b92a25b7b8b53d2d5445bb82f69ccea8727035ecc5c00444e",
+    "nf4": "f94a9fb9547bc2fde39c0932c00d13829ca70075b891937b4bec190a2ebc7089"
+  },
+  "predictions_sha256": "cb748e494adc69e8af663012c3f9bc2b9eab6a40867c240e954ead47d29ac05b",
+  "metadata_sha256": "ac61e2dc8f98c8c11dd84f7ffca2ea040851a803012bfc1ff38a0aab485e5cd2",
+  "metrics": {
+    "overlay_with_transcription": {
+      "n": 2000,
+      "macro_f1": 0.8219124194018977,
+      "accuracy": 0.8265,
+      "invalid_count": 0,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          666,
+          334,
+          0
+        ],
+        [
+          13,
+          987,
+          0
+        ]
+      ],
+      "strict_format_compliance": 1.0
+    }
+  },
+  "evaluation_wall_seconds": 1801.3210497945547,
+  "peak_inference_allocated_bytes": 7231498752,
+  "peak_inference_reserved_bytes": 8636071936,
+  "qualification": "One quality pass; wall time is not a controlled repeated latency benchmark; adapters unmerged"
+}

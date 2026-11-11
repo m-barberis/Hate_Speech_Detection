@@ -1,0 +1,78 @@
+{
+  "fp16": {
+    "baseline": {
+      "median_wall_seconds": 47.31923649832606,
+      "speedup_over_baseline": 1.0,
+      "peak_allocated_bytes": 19045167616,
+      "correctness_loss_delta": 0.0,
+      "gradient_relative_l2": 0.0,
+      "gradient_max_absolute_difference": 0.0,
+      "qualification": "Review numerical differences; no automatic equivalence claim or variant selection"
+    },
+    "cached": {
+      "median_wall_seconds": 43.54905480518937,
+      "speedup_over_baseline": 1.0865732151938101,
+      "peak_allocated_bytes": 19045167616,
+      "correctness_loss_delta": 0.0,
+      "gradient_relative_l2": 0.0,
+      "gradient_max_absolute_difference": 0.0,
+      "qualification": "Review numerical differences; no automatic equivalence claim or variant selection"
+    },
+    "answer-only": {
+      "median_wall_seconds": 44.54840647056699,
+      "speedup_over_baseline": 1.062198185014536,
+      "peak_allocated_bytes": 18373318144,
+      "correctness_loss_delta": -0.0007058372721076012,
+      "gradient_relative_l2": 0.012671195351441424,
+      "gradient_max_absolute_difference": 0.11724853515625,
+      "qualification": "Review numerical differences; no automatic equivalence claim or variant selection"
+    },
+    "batch2": {
+      "median_wall_seconds": 27.082715902477503,
+      "speedup_over_baseline": 1.7472116411337217,
+      "peak_allocated_bytes": 18706687488,
+      "correctness_loss_delta": -0.0008592824451625347,
+      "gradient_relative_l2": 0.02451231879829989,
+      "gradient_max_absolute_difference": 0.22698974609375,
+      "qualification": "Review numerical differences; no automatic equivalence claim or variant selection"
+    }
+  },
+  "nf4": {
+    "baseline": {
+      "median_wall_seconds": 52.282700035721064,
+      "speedup_over_baseline": 1.0,
+      "peak_allocated_bytes": 9151165952,
+      "correctness_loss_delta": 0.0,
+      "gradient_relative_l2": 0.0,
+      "gradient_max_absolute_difference": 0.0,
+      "qualification": "Review numerical differences; no automatic equivalence claim or variant selection"
+    },
+    "cached": {
+      "median_wall_seconds": 48.04382821172476,
+      "speedup_over_baseline": 1.088229268602743,
+      "peak_allocated_bytes": 9151165952,
+      "correctness_loss_delta": 0.0,
+      "gradient_relative_l2": 0.0,
+      "gradient_max_absolute_difference": 0.0,
+      "qualification": "Review numerical differences; no automatic equivalence claim or variant selection"
+    },
+    "answer-only": {
+      "median_wall_seconds": 48.71696789935231,
+      "speedup_over_baseline": 1.0731928174129277,
+      "peak_allocated_bytes": 8523311616,
+      "correctness_loss_delta": -0.0009253630414605141,
+      "gradient_relative_l2": 0.007505636365005248,
+      "gradient_max_absolute_difference": 0.12211227416992188,
+      "qualification": "Review numerical differences; no automatic equivalence claim or variant selection"
+    },
+    "batch2": {
+      "median_wall_seconds": 29.36113183014095,
+      "speedup_over_baseline": 1.7806772687846373,
+      "peak_allocated_bytes": 9677249536,
+      "correctness_loss_delta": 0.00014390284195542336,
+      "gradient_relative_l2": 0.026461648032854557,
+      "gradient_max_absolute_difference": 0.2756805419921875,
+      "qualification": "Review numerical differences; no automatic equivalence claim or variant selection"
+    }
+  }
+}

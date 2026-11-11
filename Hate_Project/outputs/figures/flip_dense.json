@@ -1,0 +1,57 @@
+{
+  "arm": "fp16-lora",
+  "pattern": "dense_random",
+  "prompt": "with_transcription",
+  "selection": "First matching ID in sorted order; illustrative example.",
+  "matching_pairs": 8,
+  "clean": {
+    "original_id": "TEST/15073.jpg",
+    "split": "test",
+    "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/raw/test/15073.jpg",
+    "image_sha256": "2357411cc7490205941adc3c7c53c2e8510e2d2289ba639d453a2d46c1b15596",
+    "system_prompt": "You are an automated classification API. You must output EXACTLY ONE WORD. Do not output any full sentences, explanations, or prefixes.",
+    "user_prompt": "Meme Text: 'SHE WAS SAYING SOME SHIT ABOUT HOW HER DAY WENT Sandtman AND ALL I HEARD WAS MY NAUGHTY ASS THOUGHTS'\n\nTask: Identify if this meme contains misogyny.\nAllowed Labels: 'misogynous' or 'clean'.\nAnswer:",
+    "target": "misogynous",
+    "is_augmented": false,
+    "emoji_code": null
+  },
+  "augmented": {
+    "original_id": "TEST/15073.jpg",
+    "split": "test",
+    "image_path": "/home/barberis/hate_speech_vlm/Hate_Speech_Detection/Hate_Project/data/processed/mami_unseen_patterns_seed42/images_overlay/15073.jpg",
+    "image_sha256": "0d1174751982f9a501fa4dbcba0933d3632253889fb2561b15d2e69a494c4fd3",
+    "system_prompt": "You are an automated classification API. You must output EXACTLY ONE WORD. Do not output any full sentences, explanations, or prefixes.",
+    "user_prompt": "Meme Text: 'SHE WAS SAYING SOME SHIT ABOUT HOW HER DAY WENT Sandtman AND ALL I HEARD WAS MY NAUGHTY ASS THOUGHTS'\n\nTask: Identify if this meme contains misogyny.\nAllowed Labels: 'misogynous' or 'clean'.\nAnswer:",
+    "target": "misogynous",
+    "is_augmented": true,
+    "emoji_code": "1f914",
+    "pattern": "dense_random"
+  },
+  "clean_prediction": {
+    "condition": "clean_with_transcription",
+    "original_id": "TEST/15073.jpg",
+    "true_label": 1,
+    "pred_label": 1,
+    "raw_answer": "misogynous",
+    "strict_format": true,
+    "generated_tokens": 5,
+    "input_tokens": 486,
+    "input_signature": "e32a6a2dcc0ed76e1e288f208c6eb09a1a8f62ac2c99d62caf29634eb6ed45c9",
+    "emoji_code": null
+  },
+  "augmented_prediction": {
+    "condition": "overlay_with_transcription",
+    "original_id": "TEST/15073.jpg",
+    "true_label": 1,
+    "pred_label": 0,
+    "raw_answer": "clean",
+    "strict_format": true,
+    "generated_tokens": 2,
+    "input_tokens": 486,
+    "input_signature": "121c6abf580d43a08194f4c65b50f8eddec5fc8818a30255799d7039ca5d0563",
+    "emoji_code": "1f914",
+    "pattern": "dense_random"
+  },
+  "clean_predictions_file": "results/mami_lora_qlora/test-1000-v1/fp16-lora/predictions.jsonl",
+  "augmented_predictions_file": "results/mami_lora_qlora/unseen-patterns-v1/fp16-lora/predictions.jsonl"
+}

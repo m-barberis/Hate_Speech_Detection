@@ -1,0 +1,8 @@
+{
+  "repetition": 2,
+  "wall_seconds": 52.282700035721064,
+  "mean_record_loss": 0.12676982762059194,
+  "gradient_norm": 43.65849304199219,
+  "peak_allocated_bytes": 9151165952,
+  "peak_reserved_bytes": 14296285184
+}

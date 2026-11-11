@@ -1,0 +1,90 @@
+{
+  "epoch": 2,
+  "global_step": 750,
+  "mean_training_record_loss": 0.005959519088521611,
+  "training_wall_seconds": 10713.71798575297,
+  "validation_wall_seconds": 3590.2630656957626,
+  "validation": {
+    "clean_image_only": {
+      "n": 1000,
+      "macro_f1": 0.9589979909015542,
+      "accuracy": 0.959,
+      "invalid_count": 0,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          483,
+          17,
+          0
+        ],
+        [
+          24,
+          476,
+          0
+        ]
+      ],
+      "strict_format_compliance": 1.0,
+      "mean_teacher_forced_token_loss": 0.04040656542664481
+    },
+    "overlay_image_only": {
+      "n": 1000,
+      "macro_f1": 0.9209822209997249,
+      "accuracy": 0.921,
+      "invalid_count": 0,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          468,
+          32,
+          0
+        ],
+        [
+          47,
+          453,
+          0
+        ]
+      ],
+      "strict_format_compliance": 1.0,
+      "mean_teacher_forced_token_loss": 0.06242161957231431
+    },
+    "clean_with_transcription": {
+      "n": 1000,
+      "macro_f1": 0.952999576996193,
+      "accuracy": 0.953,
+      "invalid_count": 0,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          478,
+          22,
+          0
+        ],
+        [
+          25,
+          475,
+          0
+        ]
+      ],
+      "strict_format_compliance": 1.0,
+      "mean_teacher_forced_token_loss": 0.04923912330504122
+    },
+    "overlay_with_transcription": {
+      "n": 1000,
+      "macro_f1": 0.9269788969012045,
+      "accuracy": 0.927,
+      "invalid_count": 0,
+      "confusion_rows_true_0_1_cols_pred_0_1_invalid": [
+        [
+          472,
+          28,
+          0
+        ],
+        [
+          45,
+          455,
+          0
+        ]
+      ],
+      "strict_format_compliance": 1.0,
+      "mean_teacher_forced_token_loss": 0.066484486016484
+    }
+  },
+  "checkpoint": "epoch-2/adapter"
+}
